@@ -36,6 +36,7 @@ table.basic caption > textarea {
 
 table.basic caption .counters {
 	background-color: #000;
+	border: 1px solid #fff;
 	color: #eee;
 	display: inline-block;
 	font-size: 2em;
@@ -91,29 +92,53 @@ table.basic caption .select-limit-controls span.decrement:before {
 }
 
 .col-slot {
-	border-left: 12px solid transparent;
-	border-right: 12px solid transparent;
-	border-top: 12px solid #fff;
-	cursor: pointer;
+	background-color: #fff;
+	/* border-radius: 100%; */
 	display: block;
-	float: right;
-	margin: 5px;
+	height: 26px;
+	position: absolute;
+	text-align: center;
+	width: 26px;
+	right: 5px;
+	top: 5px;
 }
 
-.asc .col-slot {
-	border-bottom: 12px solid #fff;
-	border-left: 12px solid transparent;
-	border-right: 12px solid transparent;
-	border-top: none;
+.col-slot b {
+	border: 12px solid transparent;
+	border-top: 12px solid #fff;
+	border-bottom-width: 0;
+	content: '';
+	cursor: pointer;
+	display: block;
+	position: absolute;
+	top: 9px;
+	left: 1px;
+}
+
+.asc .col-slot b {
+	border: 12px solid transparent;
+	border-bottom-color: #fff;
+	border-top-width: 0;
+	top: 6px;
+}
+
+table.basic thead td:not(:first-child) {
+	padding-right: 36px;
+	position: relative;
+	height: 40px;
 }
 
 table.basic thead tr:last-child td .col-slot {
-	border-top: 12px solid #8c8c8c;
+	background-color: #bbb;
 }
 
-table.basic thead tr:last-child td.asc .col-slot {
-	border-bottom: 12px solid #8c8c8c;
-	border-top: none;
+table.basic thead tr:last-child td .col-slot b {
+	border-top-color: #8c8c8c;
+}
+
+table.basic thead tr:last-child td.asc .col-slot b {
+	border-bottom-color: #8c8c8c;
+	border-top-width: 0;
 }
 
 table.basic thead tr:first-child td {

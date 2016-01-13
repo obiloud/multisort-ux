@@ -209,8 +209,8 @@ function renderTableHead(options) {
 	options.colors = getColors(l, options);
 	
 	for (; i < l; i += 1) {
-		html += ['<td style="background-color:rgb(', options.colors[i], ');">', letters[i], '<i></i><span class="col-slot"></span></td>'].join('');
-		cols[i].innerHTML += '<span class="col-slot"></span>';
+		html += ['<td style="background-color:rgb(', options.colors[i], ');">', letters[i], '<i></i><span class="col-slot"><b></b></span></td>'].join('');
+		cols[i].innerHTML += '<span class="col-slot"><b></b></span>';
 	}
 	options.table.querySelector('thead tr:first-child').innerHTML += html;
 	mapPrioritiesToColumns(options);
@@ -228,13 +228,13 @@ function mapPrioritiesToColumns(options) {
 		if (options.sort[i][1] !== '<') {
 			p[i].classList.add('asc');
 			col.classList.add('asc');
-			col.querySelector('.col-slot').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
-			p[i].querySelector('.col-slot').style.borderBottomColor = '#aaa';
+			col.querySelector('.col-slot b').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
+			p[i].querySelector('.col-slot b').style.borderBottomColor = '#aaa';
 		} else {
 			p[i].classList.remove('asc');
 			col.classList.remove('asc');
-			col.querySelector('.col-slot').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
-			p[i].querySelector('.col-slot').style.borderTopColor = '#aaa';
+			col.querySelector('.col-slot b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
+			p[i].querySelector('.col-slot b').style.borderTopColor = '#aaa';
 		}
 		
 	}
