@@ -153,6 +153,11 @@ table.basic caption .select-limit-controls span.decrement:before {
 	right: 6px;
 }
 
+table.basic thead tr:first-child td:nth-child(2) .hsort.dec,
+table.basic thead tr:first-child td:last-child .hsort.inc {
+	display: none;
+}
+
 table.basic thead td:not(:first-child) {
 	padding-right: 36px;
 	position: relative;
