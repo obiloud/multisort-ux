@@ -223,18 +223,18 @@ function mapPrioritiesToColumns(options) {
 		col;
 	for (; i < l; i += 1) {
 		col = options.table.querySelector(['[data-col="', options.sort[i][0], '"]'].join(''));
-		p[i].querySelector('i').innerHTML += col.innerText;
+		p[i].querySelector('i').innerHTML += col.textContent;
 		
 		if (options.sort[i][1] !== '<') {
 			p[i].classList.add('asc');
 			col.classList.add('asc');
 			col.querySelector('.col-slot b').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
-			p[i].querySelector('.col-slot b').style.borderBottomColor = '#aaa';
+			p[i].querySelector('.col-slot b').style.borderBottomColor = '#777';
 		} else {
 			p[i].classList.remove('asc');
 			col.classList.remove('asc');
 			col.querySelector('.col-slot b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
-			p[i].querySelector('.col-slot b').style.borderTopColor = '#aaa';
+			p[i].querySelector('.col-slot b').style.borderTopColor = '#777';
 		}
 		
 	}
@@ -296,8 +296,8 @@ function renderTable(options) {
 	options.data.sort(sortByMultiple.apply(null, options.sort));
 
 	options.table.addEventListener('selection', function (e) {
-		options.table.querySelector('caption .counters .total').innerText = e.detail.data.length;
-		options.table.querySelector('caption .counters .selected').innerText = e.detail.selected.length;
+		options.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
+		options.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
 	});
 
 	renderTableBody(options);

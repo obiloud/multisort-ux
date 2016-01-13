@@ -92,8 +92,7 @@ table.basic caption .select-limit-controls span.decrement:before {
 }
 
 .col-slot {
-	background-color: #fff;
-	/* border-radius: 100%; */
+	background-color: rgba(255,255,255,0.5);
 	display: block;
 	height: 26px;
 	position: absolute;
@@ -129,15 +128,15 @@ table.basic thead td:not(:first-child) {
 }
 
 table.basic thead tr:last-child td .col-slot {
-	background-color: #bbb;
+	background-color: rgba(0,0,0,0.1);
 }
 
 table.basic thead tr:last-child td .col-slot b {
-	border-top-color: #8c8c8c;
+	border-top-color: #aaa;
 }
 
 table.basic thead tr:last-child td.asc .col-slot b {
-	border-bottom-color: #8c8c8c;
+	border-bottom-color: #aaa;
 	border-top-width: 0;
 }
 
