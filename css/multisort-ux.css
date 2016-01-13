@@ -91,8 +91,7 @@ table.basic caption .select-limit-controls span.decrement:before {
 	width: 0;
 }
 
-.col-slot {
-	background-color: rgba(255,255,255,0.5);
+.vsort, .hsort {
 	display: block;
 	height: 26px;
 	position: absolute;
@@ -102,9 +101,13 @@ table.basic caption .select-limit-controls span.decrement:before {
 	top: 5px;
 }
 
-.col-slot b {
+.vsort {
+	background-color: rgba(0,0,0,0.1);
+}
+
+.vsort b {
 	border: 12px solid transparent;
-	border-top: 12px solid #fff;
+	border-top: 12px solid #aaa;
 	border-bottom-width: 0;
 	content: '';
 	cursor: pointer;
@@ -114,11 +117,40 @@ table.basic caption .select-limit-controls span.decrement:before {
 	left: 1px;
 }
 
-.asc .col-slot b {
+.vsort.asc b {
 	border: 12px solid transparent;
-	border-bottom-color: #fff;
+	border-bottom-color: #aaa;
 	border-top-width: 0;
 	top: 6px;
+}
+
+.hsort {
+	background-color: rgba(255,255,255,0.5);
+	opacity: 0;
+}
+
+.hsort b {
+	border: 12px solid transparent;
+	content: '';
+	cursor: pointer;
+	display: block;
+	position: absolute;
+	top: 1px;
+}
+
+.hsort.dec {
+	left: 5px;
+}
+
+.hsort.dec b {
+	border-left-width: 0;
+	border-right-color: #fff;
+	left: 9px;
+}
+.hsort.inc b {
+	border-right-width: 0;
+	border-left-color: #fff;
+	right: 6px;
 }
 
 table.basic thead td:not(:first-child) {
@@ -127,24 +159,30 @@ table.basic thead td:not(:first-child) {
 	height: 40px;
 }
 
-table.basic thead tr:last-child td .col-slot {
-	background-color: rgba(0,0,0,0.1);
+table.basic thead  tr:first-child td:not(:first-child) {
+	padding: 0;
+	text-align: center;
 }
 
-table.basic thead tr:last-child td .col-slot b {
-	border-top-color: #aaa;
+table.basic thead  tr:first-child td:not(:first-child) p {
+	padding: 0;
+	margin: 0;
+	height: 26px;
+	margin: 5px;
 }
 
-table.basic thead tr:last-child td.asc .col-slot b {
-	border-bottom-color: #aaa;
-	border-top-width: 0;
-}
-
-table.basic thead tr:first-child td {
+table.basic thead tr:first-child td p {
+	cursor: default;
 	font-weight: bold;
 }
 
+table.basic thead tr:first-child td:hover .hsort {
+	opacity: 1;
+}
+
 table.basic thead tr:first-child td i {
+	color: #777;
+	display: block;
 	font-weight: normal;
-	margin-left: 10px;
+	margin: 5px;
 }

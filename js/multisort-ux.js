@@ -209,8 +209,14 @@ function renderTableHead(options) {
 	options.colors = getColors(l, options);
 	
 	for (; i < l; i += 1) {
-		html += ['<td style="background-color:rgb(', options.colors[i], ');">', letters[i], '<i></i><span class="col-slot"><b></b></span></td>'].join('');
-		cols[i].innerHTML += '<span class="col-slot"><b></b></span>';
+		html += [
+			'<td style="background-color:rgb(', 
+			options.colors[i], 
+			');"><p>', 
+			letters[i], 
+			'</p><span class="hsort dec"><b></b></span><i></i><span class="hsort inc"><b></b></span></td>'
+		].join('');
+		cols[i].innerHTML += '<span class="vsort"><b></b></span>';
 	}
 	options.table.querySelector('thead tr:first-child').innerHTML += html;
 	mapPrioritiesToColumns(options);
@@ -226,15 +232,11 @@ function mapPrioritiesToColumns(options) {
 		p[i].querySelector('i').innerHTML += col.textContent;
 		
 		if (options.sort[i][1] !== '<') {
-			p[i].classList.add('asc');
-			col.classList.add('asc');
-			col.querySelector('.col-slot b').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
-			p[i].querySelector('.col-slot b').style.borderBottomColor = '#777';
+			col.querySelector('.vsort').classList.add('asc');
+			col.querySelector('.vsort b').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
 		} else {
-			p[i].classList.remove('asc');
-			col.classList.remove('asc');
-			col.querySelector('.col-slot b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
-			p[i].querySelector('.col-slot b').style.borderTopColor = '#777';
+			col.querySelector('.vsort').classList.remove('asc');
+			col.querySelector('.vsort b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
 		}
 		
 	}
