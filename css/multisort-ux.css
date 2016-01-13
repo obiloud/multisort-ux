@@ -1,0 +1,126 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+table.basic {
+	font-family: sans-serif;
+	width: 100%;
+}
+table.basic td {
+	background-color: #efefef;
+	padding: 5px;
+}
+table.basic thead td {
+	background-color: #aaa;
+	color: #fff;
+}
+
+table.basic tr.done td {
+	background-color: #bbb;
+	color: #fff;
+}
+
+table.basic tr td:first-child > input[type="checkbox"] {
+	cursor: pointer;
+	width: 32px;
+	height: 32px;
+}
+
+table.basic caption {
+	text-align: left;
+}
+
+table.basic caption > textarea {
+	display: none;
+}
+
+table.basic caption .counters {
+	background-color: #000;
+	color: #eee;
+	display: inline-block;
+	font-size: 2em;
+	padding: 10px;
+}
+
+table.basic caption .select-limit-controls {
+	display: inline-block;
+	padding-right: 30px;
+	position: relative;
+}
+
+table.basic caption .select-limit-controls label {
+	display: block;
+}
+
+table.basic caption .select-limit-controls span {
+	cursor: pointer;
+	display: block;
+	height: 15px;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	width: 24px;
+}
+
+table.basic caption .select-limit-controls span.increment {
+	top: 0;
+}
+
+table.basic caption .select-limit-controls span.decrement {
+	bottom: 0;
+}
+
+table.basic caption .select-limit-controls span.increment:before {
+	border-bottom: 12px solid #000;
+	border-left: 12px solid transparent;
+	border-right: 12px solid transparent;
+	content: '';
+	display: inline-block;
+	height: 0;
+	width: 0;
+}
+
+table.basic caption .select-limit-controls span.decrement:before {
+	border-top: 12px solid #000;
+	border-left: 12px solid transparent;
+	border-right: 12px solid transparent;
+	content: '';
+	display: inline-block;
+	height: 0;
+	width: 0;
+}
+
+.col-slot {
+	border-left: 12px solid transparent;
+	border-right: 12px solid transparent;
+	border-top: 12px solid #fff;
+	cursor: pointer;
+	display: block;
+	float: right;
+	margin: 5px;
+}
+
+.asc .col-slot {
+	border-bottom: 12px solid #fff;
+	border-left: 12px solid transparent;
+	border-right: 12px solid transparent;
+	border-top: none;
+}
+
+table.basic thead tr:last-child td .col-slot {
+	border-top: 12px solid #8c8c8c;
+}
+
+table.basic thead tr:last-child td.asc .col-slot {
+	border-bottom: 12px solid #8c8c8c;
+	border-top: none;
+}
+
+table.basic thead tr:first-child td {
+	font-weight: bold;
+}
+
+table.basic thead tr:first-child td i {
+	font-weight: normal;
+	margin-left: 10px;
+}
