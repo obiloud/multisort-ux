@@ -254,6 +254,26 @@ function registerMouseClickHandlers(options) {
 		o.addEventListener('click', function (e) {
 			e.stopPropagation();
 			
+			var col = e.target.parentNode.parentNode,
+			columns = options.table.querySelectorAll('td.occ'),
+			index = Array.prototype.indexOf.call(columns, col),
+			a = options.sort[index],
+			b;
+			
+			if (e.target.parentNode.classList.contains('inc')) {
+				b = options.sort[index + 1];
+				options.sort[index + 1] = a;
+				options.sort[index] = b;
+			} else {
+				b = options.sort[index - 1];
+				options.sort[index - 1] = a;
+				options.sort[index] = b;
+			}
+			
+			options.data.sort(sortByMultiple.apply(null, options.sort));
+			renderTableBody(options);
+			mapPrioritiesToColumns(options);
+			updateSelectionLength(options);
 		}, true);
 	});
 }
