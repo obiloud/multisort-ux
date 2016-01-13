@@ -251,7 +251,10 @@ function registerMouseClickHandlers(options) {
 		}, true);
 	});
 	Array.prototype.map.call(hsort, function (o) {
-		o.addEventListener('click', function (e) {}, false);
+		o.addEventListener('click', function (e) {
+			e.stopPropagation();
+			
+		}, true);
 	});
 }
 
