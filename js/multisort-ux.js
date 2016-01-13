@@ -200,6 +200,38 @@ function registerSelectChangeHandlers(options) {
 	onSelectionChange(boxes, options);
 }
 
+function registerMouseClickHandlers(options) {
+	var vsort = options.table.querySelectorAll('.vsort b'),
+	hsort = options.table.querySelectorAll('.hsort b');
+	
+	Array.prototype.map.call(vsort, function (o) {
+		o.addEventListener('click', function (e) {
+			e.stopPropagation();
+			var col = e.target.parentNode.parentNode, ord, name;
+			name = col.getAttribute('data-col');
+			if (e.target.parentNode.classList.contains('asc')) {
+				ord = '<';
+			} else {
+				ord = '>';
+			}
+			options.sort = options.sort.map(function (o, i) {
+				if (o[0] === name) {
+					o[1] = ord;
+				}
+				return o;
+			});
+			options.data.sort(sortByMultiple.apply(null, options.sort));
+			renderTableBody(options);
+			mapPrioritiesToColumns(options);
+		}, true);
+	});
+	Array.prototype.map.call(hsort, function (o) {
+		o.addEventListener('click', function (e) {
+			
+		}, false);
+	});
+}
+
 function renderTableHead(options) {
 	var i = 0, cols = options.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
 	l = cols.length,
@@ -220,6 +252,7 @@ function renderTableHead(options) {
 	}
 	options.table.querySelector('thead tr:first-child').innerHTML += html;
 	mapPrioritiesToColumns(options);
+	registerMouseClickHandlers(options);
 }
 
 function mapPrioritiesToColumns(options) {
@@ -227,9 +260,17 @@ function mapPrioritiesToColumns(options) {
 		l = options.sort.length,
 		i = 0, 
 		col;
+		
+	Array.prototype.map.call(p, function (o){
+		o.classList.remove('last');
+		o.querySelector('i').textContent = '';
+		return o.classList.remove('occ');
+	});
+	
 	for (; i < l; i += 1) {
 		col = options.table.querySelector(['[data-col="', options.sort[i][0], '"]'].join(''));
 		p[i].querySelector('i').innerHTML += col.textContent;
+		p[i].classList.add('occ');
 		
 		if (options.sort[i][1] !== '<') {
 			col.querySelector('.vsort').classList.add('asc');
@@ -239,6 +280,13 @@ function mapPrioritiesToColumns(options) {
 			col.querySelector('.vsort b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
 		}
 		
+		if (i === 0) {
+			p[i].classList.add('first');
+		}
+		
+		if (i === l - 1) {
+			p[i].classList.add('last');
+		}
 	}
 }
 

@@ -10,9 +10,18 @@ table.basic td {
 	background-color: #efefef;
 	padding: 5px;
 }
+
 table.basic thead td {
 	background-color: #aaa;
 	color: #fff;
+}
+
+table.basic thead tr:first-child td {
+	background-color: #333;
+}
+
+table.basic tr.selected td {
+	background-color: #eee;
 }
 
 table.basic tr.done td {
@@ -153,11 +162,6 @@ table.basic caption .select-limit-controls span.decrement:before {
 	right: 6px;
 }
 
-table.basic thead tr:first-child td:nth-child(2) .hsort.dec,
-table.basic thead tr:first-child td:last-child .hsort.inc {
-	display: none;
-}
-
 table.basic thead td:not(:first-child) {
 	padding-right: 36px;
 	position: relative;
@@ -181,7 +185,12 @@ table.basic thead tr:first-child td p {
 	font-weight: bold;
 }
 
-table.basic thead tr:first-child td:hover .hsort {
+table.basic thead tr:first-child td.occ.first .hsort.dec,
+table.basic thead tr:first-child td.occ.last .hsort.inc {
+	display: none;
+}
+
+table.basic thead tr:first-child td.occ:hover .hsort {
 	opacity: 1;
 }
 
