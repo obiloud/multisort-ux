@@ -165,13 +165,13 @@ function updateSelectionLength(options) {
 	l,
 	extra,
 	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]');
-	
+
 	if (options.selected.length > options.limit) {
 		extra = options.selected.slice(options.limit - options.selected.length);
 		for (i = 0, l = extra.length; i < l; i += 1) {
 			options.table.querySelector(['input[value="', extra[i], '"]'].join('')).checked = false;
 		}
-	} 
+	}
 	if (options.selected.length < options.limit) {
 		for (i = 0, l = options.limit; i < l; i += 1) {
 			if (!boxes[i].checked) {
@@ -253,13 +253,11 @@ function registerMouseClickHandlers(options) {
 	Array.prototype.map.call(hsort, function (o) {
 		o.addEventListener('click', function (e) {
 			e.stopPropagation();
-			
 			var col = e.target.parentNode.parentNode,
 			columns = options.table.querySelectorAll('td.occ'),
 			index = Array.prototype.indexOf.call(columns, col),
 			a = options.sort[index],
 			b;
-			
 			if (e.target.parentNode.classList.contains('inc')) {
 				b = options.sort[index + 1];
 				options.sort[index + 1] = a;
@@ -269,7 +267,6 @@ function registerMouseClickHandlers(options) {
 				options.sort[index - 1] = a;
 				options.sort[index] = b;
 			}
-			
 			options.data.sort(sortByMultiple.apply(null, options.sort));
 			renderTableBody(options);
 			mapPrioritiesToColumns(options);
@@ -381,7 +378,7 @@ function renderTableBody(options) {
 }
 
 function renderTable(options) {
-	
+
 	options = augment({
 			table : 'table',
 			data : [],
@@ -395,7 +392,7 @@ function renderTable(options) {
 		}, options);
 
 	options.table = document.querySelector(options.table);
-		
+
 	renderTableHead(options);
 
 	options.data.sort(sortByMultiple.apply(null, options.sort));
