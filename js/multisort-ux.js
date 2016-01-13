@@ -160,6 +160,28 @@ function onSelectionChange(boxes, options) {
 		}));
 }
 
+function updateSelectionLength(options) {
+	var i,
+	l,
+	extra,
+	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]');
+	
+	if (options.selected.length > options.limit) {
+		extra = options.selected.slice(options.limit - options.selected.length);
+		for (i = 0, l = extra.length; i < l; i += 1) {
+			options.table.querySelector(['input[value="', extra[i], '"]'].join('')).checked = false;
+		}
+	} 
+	if (options.selected.length < options.limit) {
+		for (i = 0, l = options.limit; i < l; i += 1) {
+			if (!boxes[i].checked) {
+				boxes[i].checked = true;
+			}
+		}
+	}
+	onSelectionChange(boxes, options);
+}
+
 function registerSelectChangeHandlers(options) {
 	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
@@ -203,11 +225,13 @@ function registerSelectChangeHandlers(options) {
 function registerMouseClickHandlers(options) {
 	var vsort = options.table.querySelectorAll('.vsort b'),
 	hsort = options.table.querySelectorAll('.hsort b');
-	
+
 	Array.prototype.map.call(vsort, function (o) {
 		o.addEventListener('click', function (e) {
 			e.stopPropagation();
-			var col = e.target.parentNode.parentNode, ord, name;
+			var col = e.target.parentNode.parentNode,
+			ord,
+			name;
 			name = col.getAttribute('data-col');
 			if (e.target.parentNode.classList.contains('asc')) {
 				ord = '<';
@@ -215,63 +239,92 @@ function registerMouseClickHandlers(options) {
 				ord = '>';
 			}
 			options.sort = options.sort.map(function (o, i) {
-				if (o[0] === name) {
-					o[1] = ord;
-				}
-				return o;
-			});
+					if (o[0] === name) {
+						o[1] = ord;
+					}
+					return o;
+				});
 			options.data.sort(sortByMultiple.apply(null, options.sort));
 			renderTableBody(options);
 			mapPrioritiesToColumns(options);
+			updateSelectionLength(options);
 		}, true);
 	});
 	Array.prototype.map.call(hsort, function (o) {
-		o.addEventListener('click', function (e) {
-			
-		}, false);
+		o.addEventListener('click', function (e) {}, false);
+	});
+}
+
+function registerSelectionLimitHandlers(options) {
+	var limiter = options.table.querySelector('caption .select-limit-controls > input');
+
+	limiter.value = options.limit;
+
+	limiter.addEventListener('change', function (e) {
+		options.limit = parseInt(e.target.value, 10);
+	});
+
+	options.table.querySelector('caption .select-limit-controls > .increment').addEventListener('click', function () {
+		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
+		options.limit += 1;
+		if (options.limit > options.data.length) {
+			return options.limit = options.data.length;
+		}
+		limiter.value = options.limit;
+		updateSelectionLength(options);
+	});
+
+	options.table.querySelector('caption .select-limit-controls > .decrement').addEventListener('click', function () {
+		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
+		options.limit -= 1;
+		if (options.limit < 0) {
+			return options.limit = 0;
+		}
+		limiter.value = options.limit;
+		updateSelectionLength(options);
 	});
 }
 
 function renderTableHead(options) {
-	var i = 0, cols = options.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
+	var i = 0,
+	cols = options.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
 	l = cols.length,
 	html = '',
 	letters = getLetters();
-	
+
 	options.colors = getColors(l, options);
-	
+
 	for (; i < l; i += 1) {
 		html += [
-			'<td style="background-color:rgb(', 
-			options.colors[i], 
-			');"><p>', 
-			letters[i], 
+			'<td style="background-color:rgb(',
+			options.colors[i],
+			');"><p>',
+			letters[i],
 			'</p><span class="hsort dec"><b></b></span><i></i><span class="hsort inc"><b></b></span></td>'
 		].join('');
 		cols[i].innerHTML += '<span class="vsort"><b></b></span>';
 	}
 	options.table.querySelector('thead tr:first-child').innerHTML += html;
 	mapPrioritiesToColumns(options);
-	registerMouseClickHandlers(options);
 }
 
 function mapPrioritiesToColumns(options) {
 	var p = options.table.querySelectorAll('thead tr:first-child td:not(:first-child)'),
-		l = options.sort.length,
-		i = 0, 
-		col;
-		
-	Array.prototype.map.call(p, function (o){
+	l = options.sort.length,
+	i = 0,
+	col;
+
+	Array.prototype.map.call(p, function (o) {
 		o.classList.remove('last');
 		o.querySelector('i').textContent = '';
 		return o.classList.remove('occ');
 	});
-	
+
 	for (; i < l; i += 1) {
 		col = options.table.querySelector(['[data-col="', options.sort[i][0], '"]'].join(''));
-		p[i].querySelector('i').innerHTML += col.textContent;
+		p[i].querySelector('i').textContent += col.textContent;
 		p[i].classList.add('occ');
-		
+
 		if (options.sort[i][1] !== '<') {
 			col.querySelector('.vsort').classList.add('asc');
 			col.querySelector('.vsort b').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
@@ -279,11 +332,11 @@ function mapPrioritiesToColumns(options) {
 			col.querySelector('.vsort').classList.remove('asc');
 			col.querySelector('.vsort b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
 		}
-		
+
 		if (i === 0) {
 			p[i].classList.add('first');
 		}
-		
+
 		if (i === l - 1) {
 			p[i].classList.add('last');
 		}
@@ -302,13 +355,10 @@ function renderTableBody(options) {
 			}, options.data[i]));
 	}
 	options.table.querySelector('tbody').innerHTML = html;
-	registerSelectChangeHandlers(options);
 }
 
 function renderTable(options) {
-	var limiter,
-	numColumns;
-
+	
 	options = augment({
 			table : 'table',
 			data : [],
@@ -322,26 +372,8 @@ function renderTable(options) {
 		}, options);
 
 	options.table = document.querySelector(options.table);
-
+		
 	renderTableHead(options);
-
-	limiter = options.table.querySelector('caption .select-limit-controls > input');
-
-	limiter.value = options.limit;
-
-	limiter.addEventListener('change', function (e) {
-		options.limit = parseInt(e.target.value, 10);
-	});
-
-	options.table.querySelector('caption .select-limit-controls > .increment').addEventListener('click', function () {
-		options.limit += 1;
-		limiter.value = options.limit;
-	});
-
-	options.table.querySelector('caption .select-limit-controls > .decrement').addEventListener('click', function () {
-		options.limit -= 1;
-		limiter.value = options.limit;
-	});
 
 	options.data.sort(sortByMultiple.apply(null, options.sort));
 
@@ -351,4 +383,8 @@ function renderTable(options) {
 	});
 
 	renderTableBody(options);
+
+	registerSelectionLimitHandlers(options);
+	registerMouseClickHandlers(options);
+	registerSelectChangeHandlers(options);
 }
