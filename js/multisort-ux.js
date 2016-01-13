@@ -246,6 +246,7 @@ function registerMouseClickHandlers(options) {
 				});
 			options.data.sort(sortByMultiple.apply(null, options.sort));
 			renderTableBody(options);
+			registerSelectChangeHandlers(options);
 			mapPrioritiesToColumns(options);
 			updateSelectionLength(options);
 		}, true);
@@ -269,6 +270,7 @@ function registerMouseClickHandlers(options) {
 			}
 			options.data.sort(sortByMultiple.apply(null, options.sort));
 			renderTableBody(options);
+			registerSelectChangeHandlers(options);
 			mapPrioritiesToColumns(options);
 			updateSelectionLength(options);
 		}, true);
