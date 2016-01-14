@@ -101,13 +101,11 @@ table.basic caption .select-limit-controls span.decrement:before {
 }
 
 .vsort, .hsort {
-	display: block;
-	height: 26px;
-	position: absolute;
+	display: inline-block;
+	height: 20px;
 	text-align: center;
-	width: 26px;
-	right: 5px;
-	top: 5px;
+	position: relative;
+	width: 40px;
 }
 
 .vsort {
@@ -115,19 +113,19 @@ table.basic caption .select-limit-controls span.decrement:before {
 }
 
 .vsort b {
-	border: 12px solid transparent;
-	border-top: 12px solid #aaa;
+	border: 10px solid transparent;
+	border-top: 10px solid #aaa;
 	border-bottom-width: 0;
 	content: '';
 	cursor: pointer;
 	display: block;
 	position: absolute;
-	top: 9px;
-	left: 1px;
+	top: 6px;
+	left: 11px;
 }
 
 .vsort.asc b {
-	border: 12px solid transparent;
+	border: 10px solid transparent;
 	border-bottom-color: #aaa;
 	border-top-width: 0;
 	top: 6px;
@@ -147,21 +145,6 @@ table.basic caption .select-limit-controls span.decrement:before {
 	top: 1px;
 }
 
-.hsort.dec {
-	left: 5px;
-}
-
-.hsort.dec b {
-	border-left-width: 0;
-	border-right-color: #fff;
-	left: 9px;
-}
-.hsort.inc b {
-	border-right-width: 0;
-	border-left-color: #fff;
-	right: 6px;
-}
-
 table.basic thead td:not(:first-child) {
 	padding-right: 36px;
 	position: relative;
@@ -178,24 +161,24 @@ table.basic thead tr.multirow td {
 table.basic thead tr.multirow.c td {
 	background-color: #aaa;
 }
-table.basic thead tr.multirow.c .clear {
+table.basic thead tr.multirow.c .off {
 	cursor: pointer;
 	display: inline-block;
 }
-table.basic thead tr.multirow.c .clear > b{
+table.basic thead tr.multirow.c .off > b{
 	display: block;
 	height: 20px;
 	position: relative;
 	width: 20px;
 }
-table.basic thead tr.multirow.c .clear > b:before {
+table.basic thead tr.multirow.c .off > b:before {
 	transform: rotate(45deg);
 }
-table.basic thead tr.multirow.c .clear > b:after {
+table.basic thead tr.multirow.c .off > b:after {
 	transform: rotate(-45deg);
 }
-table.basic thead tr.multirow.c .clear > b:before,
-table.basic thead tr.multirow.c .clear > b:after {
+table.basic thead tr.multirow.c .off > b:before,
+table.basic thead tr.multirow.c .off > b:after {
 	background-color: #fff;
 	content: '';
 	display: block;
@@ -208,6 +191,7 @@ table.basic thead tr.multirow.c .hsort {
 	background-color: rgba(255, 255, 255, 0.4);
 	height: 20px;
 	opacity: 1;
+	position: absolute;
 	top: 0;
 	width: 34px;
 }
@@ -251,6 +235,20 @@ table.basic thead tr.multirow.c .hsort.dec > b:after {
 	right: 9px;
 	transform: rotate(45deg);
 }
+
+table.basic thead tr.multirow.c .vsort.on {
+	display: none;
+}
+
+table.basic thead tr.multirow.c td[data-priority="-1"] .on {
+	display: inline-block;
+}
+
+table.basic thead tr.multirow.c td[data-priority="-1"] .hsort,
+table.basic thead tr.multirow.c td[data-priority="-1"] .off {
+	display: none;
+}
+
 
 table.basic thead  tr:not(:last-child) td:not(:first-child) {
 	padding: 0;

@@ -224,58 +224,103 @@ function registerSelectionChangeHandlers(options) {
 
 function registerMouseClickHandlers(options) {
 	var vsort = options.table.querySelectorAll('.vsort b'),
-	hsort = options.table.querySelectorAll('.hsort b');
-
-	Array.prototype.map.call(vsort, function (o) {
-		o.addEventListener('click', function (e) {
-			e.stopPropagation();
-			var col = e.target.parentNode.parentNode,
-			ord,
-			name;
-			name = col.getAttribute('data-col');
-			if (e.target.parentNode.classList.contains('asc')) {
-				ord = '<';
-			} else {
-				ord = '>';
-			}
-			options.sort = options.sort.map(function (o, i) {
-					if (o[0] === name) {
-						o[1] = ord;
-					}
-					return o;
-				});
-			options.data.sort(sortByMultiple.apply(null, options.sort));
-			renderTableBody(options);
-			registerSelectionChangeHandlers(options);
-			renderTableHeader(options);
-			registerMouseClickHandlers(options);
-			updateSelectionLength(options);
-		}, true);
-	});
-	Array.prototype.map.call(hsort, function (o) {
-		o.addEventListener('click', function (e) {
-			e.stopPropagation();
-			var col = e.target.parentNode.parentNode,
-			priority = parseInt(col.getAttribute('data-priority')),
-			a;
-			if (priority > -1) {				
-				if (e.target.parentNode.classList.contains('inc') && priority > 0) {
-					a = options.sort[priority - 1];
-					options.sort[priority - 1] = options.sort[priority];
-					options.sort[priority] = a;
-				} else if (e.target.parentNode.classList.contains('dec') && priority < options.sort.length - 1) {
-					a = options.sort[priority];
-					options.sort[priority] = options.sort[priority + 1];
-					options.sort[priority + 1] = a;
+	hsort = options.table.querySelectorAll('.hsort b'),
+	off = options.table.querySelectorAll('.off b'),
+	on = options.table.querySelectorAll('.vsort.on b');
+	
+	var update = function () {
+		options.data.sort(sortByMultiple.apply(null, options.sort));
+		renderTableBody(options);
+		registerSelectionChangeHandlers(options);
+		renderTableHeader(options);
+		registerMouseClickHandlers(options);
+		updateSelectionLength(options);
+	};
+	
+	vsort.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode,
+		ord,
+		name;
+		name = col.getAttribute('data-col');
+		if (e.target.parentNode.classList.contains('asc')) {
+			ord = '<';
+		} else {
+			ord = '>';
+		}
+		options.sort = options.sort.map(function (o, i) {
+				if (o[0] === name) {
+					o[1] = ord;
 				}
-				options.data.sort(sortByMultiple.apply(null, options.sort));
-				renderTableBody(options);
-				registerSelectionChangeHandlers(options);
-				renderTableHeader(options);
-				registerMouseClickHandlers(options);			
-				updateSelectionLength(options);
+				return o;
+			});
+		update();
+	};
+	Array.prototype.map.call(vsort, function (o) {
+		if (!o.listener || o.listener != vsort.listener) {
+			o.addEventListener('click', vsort.listener);
+		}
+		o.listener = vsort.listener;
+	});
+	hsort.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode,
+		priority = parseInt(col.getAttribute('data-priority')),
+		a;
+		if (priority > -1) {				
+			if (e.target.parentNode.classList.contains('inc') && priority > 0) {
+				a = options.sort[priority - 1];
+				options.sort[priority - 1] = options.sort[priority];
+				options.sort[priority] = a;
+			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sort.length - 1) {
+				a = options.sort[priority];
+				options.sort[priority] = options.sort[priority + 1];
+				options.sort[priority + 1] = a;
 			}
-		}, true);
+			update();
+		}
+	};
+	Array.prototype.map.call(hsort, function (o) {
+		if (!o.listener || o.listener != hsort.listener) {
+			o.addEventListener('click', hsort.listener);
+		}
+		o.listener = hsort.listener;
+	});
+	off.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode;
+		p = parseInt(col.getAttribute('data-priority'));
+		if (p > -1) {				
+			options.sort.splice(p, 1);
+			update();
+		}
+	};
+	Array.prototype.map.call(off, function (o){
+		if (!o.listener || o.listener != off.listener) {
+			o.addEventListener('click', off.listener);
+		}
+		o.listener = off.listener;
+	});
+	on.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode, c = [];
+			c = (function (a) {
+			for(var i = 0, l = a.length; i < l; i += 1) {
+				c.push(a[i][0]);
+			}
+			return c;
+		})(options.sort);
+		p = c.indexOf(col.getAttribute('data-col'));
+		if (p < 0) {
+			options.sort.push([col.getAttribute('data-col'), '<']);
+			update();
+		}
+	};
+	Array.prototype.map.call(on, function (o) {
+		if (!o.listener || o.listener != on.listener) {
+			o.addEventListener('click', on.listener);
+		}
+		o.listener = on.listener;
 	});
 }
 
@@ -319,8 +364,12 @@ function renderTableHeader(options) {
 	i = 0, 
 	l = options.sort.length, 
 	n = 0, 
-	z = cols.length;
-
+	z = cols.length;	
+	
+	Array.prototype.map.call(th.querySelectorAll('.multirow'), function (o) {
+		return th.removeChild(o);
+	});
+	
 	options.colors = getColors(l, options);
 	
 	c = (function (a) {
@@ -329,10 +378,6 @@ function renderTableHeader(options) {
 		}
 		return c;
 	})(options.sort);
-	
-	Array.prototype.map.call(th.querySelectorAll('.multirow'), function (o) {
-		return th.removeChild(o);
-	});
 	
 	for (; n < z; n += 1) {		
 		crow += [
@@ -343,7 +388,8 @@ function renderTableHeader(options) {
 			'>', 
 			'<div class="hsort dec"><b></b></div>',
 			'<div class="hsort inc"><b></b></div>',
-			'<div class="clear"><b></b></div>',
+			'<div class="off"><b></b></div>',
+			'<div class="vsort on"><b></b></div>', 
 			'</td>'
 		].join('');
 	}
@@ -372,6 +418,7 @@ function renderTableHeader(options) {
 		html += '</tr>';
 	}
 	th.innerHTML = html + crow + th.innerHTML;
+	
 }
 
 function renderTableBody(options) {
