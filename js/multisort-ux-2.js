@@ -130,7 +130,13 @@ function sortByMultiple() {
 			} else {
 				_2 = 1;
 			}
-			_1 = _1 || (parseInt(a[_0[_i][0]], 10) - parseInt(b[_0[_i][0]], 10)) * _2;
+			if (typeof a[_0[_i][0]] === 'string' && typeof b[_0[_i][0]] === 'string') {
+				_1 = _1 || a[_0[_i][0]].localeCompare(b[_0[_i][0]]) * _2; 
+			} else if (!isNaN(parseInt(a[_0[_i][0]], 10)) && !isNaN(parseInt(b[_0[_i][0]], 10))) {
+				_1 = _1 || (parseInt(a[_0[_i][0]], 10) - parseInt(b[_0[_i][0]], 10)) * _2;
+			} else {
+				_1 = _1 || (a[_0[_i][0]] > b[_0[_i][0]]) * _2;
+			}
 		}
 		return _1;
 	};
