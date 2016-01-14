@@ -223,16 +223,16 @@ function registerSelectionChangeHandlers(options) {
 }
 
 function registerMouseClickHandlers(options) {
-	var vsort = options.table.querySelectorAll('.vsort b'),
-	hsort = options.table.querySelectorAll('.hsort b'),
-	off = options.table.querySelectorAll('.off b'),
-	on = options.table.querySelectorAll('.vsort.on b');
+	var vsort = options.table.querySelectorAll('.vsort > b'),
+	hsort = options.table.querySelectorAll('.hsort > b'),
+	off = options.table.querySelectorAll('.off > b'),
+	on = options.table.querySelectorAll('.on > b');
 	
 	var update = function () {
 		options.data.sort(sortByMultiple.apply(null, options.sort));
+		renderTableHeader(options);
 		renderTableBody(options);
 		registerSelectionChangeHandlers(options);
-		renderTableHeader(options);
 		registerMouseClickHandlers(options);
 		updateSelectionLength(options);
 	};
