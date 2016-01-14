@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Multisorting table tests</title>
+		<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.20.0.css">
+		<script src="http://code.jquery.com/qunit/qunit-1.20.0.js"></script>
+		<script src="js/multisort-u.js"></script>
+		<script>
+			var data;
+			function onData (result) {
+				data = result.collection;
+			}
+			//QUnit.module('Obtain data');
+			QUnit.test('test onData function exists', function (assert) {
+				assert.ok(typeof onData == 'function', 'callback exists');
+				assert.ok(typeof Array.isArray == 'function', 'isArray exists');
+				assert.ok(Array.isArray(data), 'we have data');
+			});
+			//QUnit.module('templating');
+			QUnit.test('reindeing array shifting index 3 to index 2', function(assert) {
+				var testArray = [], a, b, p, x;
+				
+				assert.notOk(testArray.length, 'empty array');
+				for (var i = 0; i < 10; i += 1) {
+					testArray[i] = [i.toString(10)];
+				}
+				assert.equal(testArray.length, 10);
+				assert.notOk(testArray[testArray.length], 'index out of reach');
+				assert.equal(testArray[testArray.length - 1], testArray[9]);
+				
+				a = testArray[3];
+				b = testArray[2];
+				p = 3;
+				assert.equal(testArray[3], a);
+				
+				// shifting up
+				x = testArray[p - 1];
+				testArray[p - 1] = testArray[p];
+				testArray[p] = x;
+				
+				assert.equal(testArray.length, 10);
+				assert.equal(testArray[2], a);
+				assert.equal(testArray[3], b);
+			});
+			QUnit.test('reindeing array pushing index 3 to index 4', function(assert) {
+				var testArray = [], a, b, p, x;
+				assert.notOk(testArray.length, 'empty array');
+				for (var i = 0; i < 10; i += 1) {
+					testArray[i] = [i.toString(10), '+'];
+				}
+				assert.equal(testArray.length, 10);
+				assert.notOk(testArray[testArray.length], 'index out of reach');
+				assert.equal(testArray[testArray.length - 1], testArray[9]);
+				
+				a = testArray[3];
+				b = testArray[4];
+				p = 3;
+				assert.equal(testArray[3], a);
+				
+				// pushing down
+				x = testArray[p];
+				testArray[p] = testArray[p + 1];
+				testArray[p + 1] = x;
+				
+				assert.equal(testArray.length, 10);
+				assert.equal(testArray[3], b);
+				assert.equal(testArray[4], a);
+			});
+		</script>
+		<script src="data.php"></script>
+	</head>
+	<body>
+	
+	<div id="qunit"></div>
+	
+	</body>
+</html>

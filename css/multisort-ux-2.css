@@ -1,0 +1,286 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+table.basic {
+	font-family: sans-serif;
+	width: 100%;
+}
+table.basic td {
+	background-color: #efefef;
+	padding: 5px;
+}
+
+table.basic thead td {
+	background-color: #aaa;
+	color: #fff;
+}
+
+table.basic thead tr:not(:last-child) td {
+	background-color: #333;
+}
+
+table.basic tr.selected td {
+	background-color: #eee;
+}
+
+table.basic tr.done td {
+	background-color: #bbb;
+	color: #fff;
+}
+
+table.basic tr td:first-child > input[type="checkbox"] {
+	cursor: pointer;
+	width: 32px;
+	height: 32px;
+}
+
+table.basic caption {
+	text-align: left;
+}
+
+table.basic caption > textarea {
+	display: none;
+}
+
+table.basic caption .counters {
+	background-color: #000;
+	border: 1px solid #fff;
+	color: #eee;
+	display: inline-block;
+	font-size: 2em;
+	padding: 10px;
+}
+
+table.basic caption .select-limit-controls {
+	display: inline-block;
+	padding-right: 30px;
+	position: relative;
+}
+
+table.basic caption .select-limit-controls label {
+	display: block;
+}
+
+table.basic caption .select-limit-controls span {
+	cursor: pointer;
+	display: block;
+	height: 15px;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	width: 24px;
+}
+
+table.basic caption .select-limit-controls span.increment {
+	top: 0;
+}
+
+table.basic caption .select-limit-controls span.decrement {
+	bottom: 0;
+}
+
+table.basic caption .select-limit-controls span.increment:before {
+	border-bottom: 12px solid #000;
+	border-left: 12px solid transparent;
+	border-right: 12px solid transparent;
+	content: '';
+	display: inline-block;
+	height: 0;
+	width: 0;
+}
+
+table.basic caption .select-limit-controls span.decrement:before {
+	border-top: 12px solid #000;
+	border-left: 12px solid transparent;
+	border-right: 12px solid transparent;
+	content: '';
+	display: inline-block;
+	height: 0;
+	width: 0;
+}
+
+.vsort, .hsort {
+	display: block;
+	height: 26px;
+	position: absolute;
+	text-align: center;
+	width: 26px;
+	right: 5px;
+	top: 5px;
+}
+
+.vsort {
+	background-color: rgba(0,0,0,0.1);
+}
+
+.vsort b {
+	border: 12px solid transparent;
+	border-top: 12px solid #aaa;
+	border-bottom-width: 0;
+	content: '';
+	cursor: pointer;
+	display: block;
+	position: absolute;
+	top: 9px;
+	left: 1px;
+}
+
+.vsort.asc b {
+	border: 12px solid transparent;
+	border-bottom-color: #aaa;
+	border-top-width: 0;
+	top: 6px;
+}
+
+.hsort {
+	background-color: rgba(255,255,255,0.5);
+	opacity: 0;
+}
+
+.hsort b {
+	border: 12px solid transparent;
+	content: '';
+	cursor: pointer;
+	display: block;
+	position: absolute;
+	top: 1px;
+}
+
+.hsort.dec {
+	left: 5px;
+}
+
+.hsort.dec b {
+	border-left-width: 0;
+	border-right-color: #fff;
+	left: 9px;
+}
+.hsort.inc b {
+	border-right-width: 0;
+	border-left-color: #fff;
+	right: 6px;
+}
+
+table.basic thead td:not(:first-child) {
+	padding-right: 36px;
+	position: relative;
+	height: 40px;
+}
+
+table.basic thead tr.multirow td {
+	height: auto;
+	line-height: 0;
+	padding: 0;
+	height: 20px;
+	text-align: center;
+}
+table.basic thead tr.multirow.c td {
+	background-color: #aaa;
+}
+table.basic thead tr.multirow.c .clear {
+	cursor: pointer;
+	display: inline-block;
+}
+table.basic thead tr.multirow.c .clear > b{
+	display: block;
+	height: 20px;
+	position: relative;
+	width: 20px;
+}
+table.basic thead tr.multirow.c .clear > b:before {
+	transform: rotate(45deg);
+}
+table.basic thead tr.multirow.c .clear > b:after {
+	transform: rotate(-45deg);
+}
+table.basic thead tr.multirow.c .clear > b:before,
+table.basic thead tr.multirow.c .clear > b:after {
+	background-color: #fff;
+	content: '';
+	display: block;
+	height: 20px;
+	left: 9px;
+	position: absolute;
+	width: 2px;
+}
+table.basic thead tr.multirow.c .hsort {
+	background-color: rgba(255, 255, 255, 0.4);
+	height: 20px;
+	opacity: 1;
+	top: 0;
+	width: 34px;
+}
+table.basic thead tr.multirow.c .hsort.dec {
+	left: 0;
+}
+table.basic thead tr.multirow.c .hsort.inc {
+	right: 0;
+}
+
+table.basic thead tr.multirow.c .hsort > b {
+	border: none;
+	height: 100%;
+	left: 0;
+	position: relative;
+	top: 0;
+	width: 100%;
+}
+table.basic thead tr.multirow.c .hsort > b:before,
+table.basic thead tr.multirow.c .hsort > b:after {
+	background-color: #fff;
+	content: '';
+	display: block;
+	height: 20px;
+	position: absolute;
+	width: 2px;
+}
+table.basic thead tr.multirow.c .hsort > b:before {
+	left: 9px;
+	transform: rotate(45deg);
+}
+table.basic thead tr.multirow.c .hsort > b:after {
+	right: 9px;
+	transform: rotate(-45deg);
+}
+table.basic thead tr.multirow.c .hsort.dec > b:before {
+	left: 9px;
+	transform: rotate(-45deg);
+}
+table.basic thead tr.multirow.c .hsort.dec > b:after {
+	right: 9px;
+	transform: rotate(45deg);
+}
+
+table.basic thead  tr:not(:last-child) td:not(:first-child) {
+	padding: 0;
+	text-align: center;
+}
+
+table.basic thead  tr:first-child td:not(:first-child) p {
+	padding: 0;
+	margin: 0;
+	height: 26px;
+	margin: 5px;
+}
+
+table.basic thead tr:first-child td p {
+	cursor: default;
+	font-weight: bold;
+}
+
+table.basic thead tr:first-child td.occ.first .hsort.dec,
+table.basic thead tr:first-child td.occ.last .hsort.inc {
+	display: none;
+}
+
+table.basic thead tr:first-child td.occ:hover .hsort {
+	opacity: 1;
+}
+
+table.basic thead tr:first-child td i {
+	color: #777;
+	display: block;
+	font-weight: normal;
+	margin: 5px;
+}
