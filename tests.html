@@ -47,7 +47,7 @@
 		})();
 		
 		function getMatrix(n, r) {	
-			var i = 0, l, b, m = [], p, w = 0, log = false;
+			var i = 0, l, b, m = [], p, w = 0, log = 1;
 			
 			b = Array.apply(null, Array(r)).map(Number.prototype.valueOf,0);
 			l = factorial(n) / (factorial(r) * factorial(n - r));
@@ -56,15 +56,13 @@
 			if (log) console.log('data matrics for ', b.length, ' column table');
 			
 			for (; i < l; i += 1) {
-				if (i > 0) {
-					if (i % p) {
-						w +=1;
-						if (w === b.length) {
-							w = 0;
-						}
+				if (i % p) {
+					w +=1;
+					if (w === b.length) {
+						w = 0;
 					}
-					b[w] += 1;
 				}
+				b[w] += 1;
 				if (log) console.log(b);
 				m.push(b.slice(0));
 			}
@@ -189,6 +187,34 @@
 			assert.equal(testArray[4], a);
 		});
 		
+		function compareResults(assert, pattern, tests) {
+			var last = '', cnt = 1;
+			for (var r in tests.individualResults) {
+				(function (current) {
+					if (!last)  {
+						last = current;
+						console.log(cnt)
+					} else {
+						if (tests.individualResults[last].join('') == tests.individualResults[current].join('')) {
+							console.log(last, tests.individualResults[last].join(''));
+							console.log(current, tests.individualResults[current].join(''));
+							last = '';
+						}
+					}
+				})(r);
+				cnt++;
+			}
+			assert.equal(cnt, tests.totalResults.length);
+			
+			var unique = tests.totalResults.map(function (i) {
+				return i.join('');
+			});
+			
+			assert.equal(unique.length, pattern.length);
+			assert.equal(unique.getUnique().length, pattern.length);
+		}
+		
+		
 		QUnit.test('multi sorting: running tests on two column table', function (assert) {
 			var pattern = getPattern(2), data = formatData(getMatrix(pattern.length, 2)), tests = {};
 			tests.individualResults = {};
@@ -217,11 +243,8 @@
 				})(test);
 			}
 			
-			var unique = tests.totalResults.map(function (i) {
-				return i.join('');
-			});
+			compareResults(assert, pattern, tests);
 			
-			assert.equal(unique.getUnique().length, pattern.length);
 		});
 		
 		QUnit.test('multi sorting: running tests on three column table', function (assert) {
@@ -246,19 +269,17 @@
 			};
 			
 			for (var test in tests) {
-				(function (test) {
-					if (['individualResults', 'totalResults'].indexOf(test) < 0) {
-						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, tests[test])));
+				(function (t) {
+					if (['individualResults', 'totalResults'].indexOf(t) < 0) {
+						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, tests[t])));
 					}
 				})(test);
 			}
 			
-			var unique = tests.totalResults.map(function (i) {
-				return i.join('');
-			});
-			
-			assert.equal(unique.getUnique().length, pattern.length);
+			compareResults(assert, pattern, tests);
 		});
+		
+		
 		
 		</script>
 	</head>
