@@ -26,9 +26,8 @@
 		</script>
 		<script type="text/javascript">
 		
-		function getMatrix(l) {	
-			var f = [], i = 0, b, m = [], p, w = 0;
-			
+		var factorial = (function () {
+			var f = [];
 			function factorial (n) {
 				if (n == 0 || n == 1) {
 					return 1;
@@ -37,12 +36,25 @@
 					return f[n];
 				}
 				return f[n] = factorial(n-1) * n;
-			} 
+			}
+			return function (n) {
+				if (typeof f[n] !== 'undefined') {
+					return f[n];
+				} else {
+					return factorial(n);
+				}
+			};
+		})();
+		
+		function getMatrix(n, r) {	
+			var i = 0, l, b, m = [], p, w = 0, log = false;
 			
-			b = Array.apply(null, Array(l)).map(Number.prototype.valueOf,0);
-			l = factorial(l*2)/Math.pow(f[l], 2);
-			p = Math.round(l / b.length);
+			b = Array.apply(null, Array(r)).map(Number.prototype.valueOf,0);
+			l = factorial(n) / (factorial(r) * factorial(n - r));
+			p = Math.round(l / r);
 				
+			if (log) console.log('data matrics for ', b.length, ' column table');
+			
 			for (; i < l; i += 1) {
 				if (i > 0) {
 					if (i % p) {
@@ -53,14 +65,14 @@
 					}
 					b[w] += 1;
 				}
-				console.log(b);
+				if (log) console.log(b);
 				m.push(b.slice(0));
 			}
 			
 			return m;
 		}
 		
-		function getData(d) {
+		function formatData(d) {
 			var data = [],
 			a = getLetters(), 
 			c,
@@ -83,6 +95,49 @@
 			return data;
 		}
 		
+		function FindAllLetterCasePermutations(s) {
+			var sp = s.split(""), buffer = [];
+			for (var i = 0, l = 1 << s.length; i < l; i++) {
+				for (var j = i, k = 0; j; j >>= 1, k++) {
+					sp[k] = (j & 1) ? sp[k].toUpperCase() : sp[k].toLowerCase();
+				}
+				buffer.push(sp.join(""));
+			}
+			return buffer;
+		}
+		
+		function FindAllPermutations(str, index, buffer) {
+			if (typeof str == "string")
+				str = str.split("");
+			if (typeof index == "undefined")
+				index = 0;
+			if (typeof buffer == "undefined")
+				buffer = [];
+			if (index >= str.length)
+				return buffer;
+			for (var i = index; i < str.length; i++)
+				buffer.push(ToggleLetters(str, index, i));
+			return FindAllPermutations(str, index + 1, buffer);
+		}
+
+		function ToggleLetters(str, index1, index2) {
+			if (index1 != index2) {
+				var temp = str[index1];
+				str[index1] = str[index2];
+				str[index2] = temp;
+			}
+			return str.join("");
+		}
+		
+		function getPattern(l) {
+			var c, buffer = [];
+			c = FindAllPermutations(getLetters().splice(0, l).join(''));
+			for (var i = 0, l = c.length; i < l; i += 1) {
+				buffer = buffer.concat(FindAllLetterCasePermutations(c[i]));
+			}
+			return buffer.getUnique();
+		}
+
 		QUnit.test('reindeing array shifting index 3 to index 2', function(assert) {
 			var testArray = [], a, b, p, x;
 			
@@ -108,6 +163,7 @@
 			assert.equal(testArray[2], a);
 			assert.equal(testArray[3], b);
 		});
+		
 		QUnit.test('reindeing array pushing index 3 to index 4', function(assert) {
 			var testArray = [], a, b, p, x;
 			assert.notOk(testArray.length, 'empty array');
@@ -134,17 +190,7 @@
 		});
 		
 		QUnit.test('multi sorting: running tests on two column table', function (assert) {
-
-/*
-ab Ab 
-AB aB 
-  
-ba Ba
-BA bA
-*/
-			var pattern = ['ab','Ab','AB','aB','Ba','BA','bA','ba'];
-
-			var data = getData(getMatrix(2)), tests = {};
+			var pattern = getPattern(2), data = formatData(getMatrix(pattern.length, 2)), tests = {};
 			tests.individualResults = {};
 			tests.totalResults = [];
 			
@@ -166,7 +212,7 @@ BA bA
 			for (var test in tests) {
 				(function (test) {
 					if (['individualResults', 'totalResults'].indexOf(test) < 0) {
-						storeResults(test, data.sort(sortByMultiple.apply(null, tests[test])).slice(0));
+						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, tests[test])));
 					}
 				})(test);
 			}
@@ -175,28 +221,12 @@ BA bA
 				return i.join('');
 			});
 			
-			assert.equal(unique.getUnique().length, 6);
+			assert.equal(unique.getUnique().length, pattern.length);
 		});
 		
 		QUnit.test('multi sorting: running tests on three column table', function (assert) {
-/*
 
-abc Abc aBc abC 
-ABC ABc AbC aBC
-
-bac Bac bAc baC   
-BAC BAc BaC bAC
-
-bca Bca bCa bcA
-BCA BCa BcA bCA
-
-cba Cba cBa cbA
-CBA CBa CbA cBA
-*/		
-
-			var pattern = ['abc','Abc','aBc','abC','ABC','ABc','AbC','aBC','bac','Bac','bAc','baC','BAC','BAc','BaC','bAC','bca','Bca','bCa','bcA','BCA','BCa','BcA','bCA','cba','Cba','cBa','cbA','CBA','CBa','CbA','cBA'];
-		
-			var data, tests = {};
+			var pattern = getPattern(3), data = formatData(getMatrix(pattern.length, 3)), tests = {};
 			tests.individualResults = {};
 			tests.totalResults = [];
 			
@@ -215,12 +245,10 @@ CBA CBa CbA cBA
 				tests.totalResults.push(tests.individualResults[test]);
 			};
 			
-			data = getData(getMatrix(3));
-			
 			for (var test in tests) {
 				(function (test) {
 					if (['individualResults', 'totalResults'].indexOf(test) < 0) {
-						storeResults(test, data.sort(sortByMultiple.apply(null, tests[test])).slice(0));
+						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, tests[test])));
 					}
 				})(test);
 			}
@@ -228,7 +256,8 @@ CBA CBa CbA cBA
 			var unique = tests.totalResults.map(function (i) {
 				return i.join('');
 			});
-			assert.equal(unique.getUnique().length, 20);
+			
+			assert.equal(unique.getUnique().length, pattern.length);
 		});
 		
 		</script>
