@@ -28,7 +28,9 @@ table.basic tr.done td {
 	background-color: #bbb;
 	color: #fff;
 }
-
+table.basic tr td:first-child {
+	width: 40px;
+}
 table.basic tr td:first-child > input[type="checkbox"] {
 	cursor: pointer;
 	width: 32px;
@@ -100,7 +102,7 @@ table.basic caption .select-limit-controls span.decrement:before {
 	width: 0;
 }
 
-.vsort, .hsort {
+.vsort, .hsort, .on {
 	display: inline-block;
 	height: 20px;
 	text-align: center;
@@ -108,11 +110,11 @@ table.basic caption .select-limit-controls span.decrement:before {
 	width: 40px;
 }
 
-.vsort {
+.vsort, .on {
 	background-color: rgba(0,0,0,0.1);
 }
 
-.vsort b {
+.vsort b, .on b {
 	border: 10px solid transparent;
 	border-top: 10px solid #aaa;
 	border-bottom-width: 0;
@@ -236,7 +238,7 @@ table.basic thead tr.multirow.c .hsort.dec > b:after {
 	transform: rotate(45deg);
 }
 
-table.basic thead tr.multirow.c .vsort.on {
+table.basic thead tr.multirow.c .on {
 	display: none;
 }
 

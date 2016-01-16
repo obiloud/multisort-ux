@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Multisort UX demo</title>
+		<meta charset="utf8" />
+		<link rel="stylesheet" media="all" type="text/css" href="css/multisort-ux-2.css" />
+		<script src="http://code.jquery.com/qunit/qunit-1.20.0.js"></script>
+		<script src="js/multisort-ux-2.js" type="text/javascript"></script>
+		<script type="text/javascript">
+		Array.prototype.getUnique = function(){
+		   var u = {}, a = [];
+		   for(var i = 0, l = this.length; i < l; ++i){
+			  if(u.hasOwnProperty(this[i])) {
+				 continue;
+			  }
+			  a.push(this[i]);
+			  u[this[i]] = 1;
+		   }
+		   return a;
+		}
+		Object.defineProperty(Array.prototype, "getUnique", {enumerable: false});
+		</script>
+		<script type="text/javascript">
+		var data = [], session = [];
+		
+		(function (d) {
+			var a = getLetters(), 
+			c,
+			i = 0, 
+			l = d.length, 
+			o,
+			r,
+			t;
+			
+			for (; i < l; i += 1) {
+				o = {};
+				o.id = i + 1;
+				r = d[i]; 
+				if (!c) c = r.length;
+				for(t = 0; t < c; t += 1) {
+					o[a[t]] = r[t];
+				}
+				console.log(o);
+				data.push(o);
+			}
+		})(getMatrix(2));
+
+		
+		function getMatrix(l) {
+			
+			var f = [];
+			function factorial (n) {
+			  if (n == 0 || n == 1)
+				return 1;
+			  if (f[n] > 0)
+				return f[n];
+			  return f[n] = factorial(n-1) * n;
+			} 
+			
+			var i = 0, b, m = [], p;
+			
+			// b is a template array
+			b = Array.apply(null, Array(l)).map(Number.prototype.valueOf,0);
+			l = factorial(l*2)/Math.pow(f[l], 2);
+			p = l / 2;
+			
+			for (; i < l; i += 1) {
+				if (b.reduce(function (a, b) {return a + b;}) < i) {
+				
+					b.reduce(function (x, y, z) {
+						if (x > y && i > p) {
+							b[z] += 1;
+						} else {
+							b[z-1] += 1;
+						}
+						return x + y + 1;
+					});
+				}
+				
+				console.log(b);
+				m.push(b.slice(0));
+			}
+			
+			return m;
+		}
+		
+		function compareResults() {
+			var unique = session.map(function (i) {
+				return i.join('');
+			});
+			console.log(unique);
+			unique = unique.getUnique();
+			console.log(unique.length);
+		}
+		
+		
+		window.addEventListener('load', function () {
+			document.querySelector('#my-table').addEventListener('selection', function (e) {
+				console.log(e.detail.selected);
+				session.push(e.detail.selected);
+			});
+			renderTable({
+				table : '#my-table',
+				data : data,
+			});
+		});
+		</script>
+	</head>
+	<body>
+		<table id="my-table" class="basic">
+			<caption>
+				<textarea>
+					<tr>
+						<td><input type="checkbox" {{checked}} value="{{id}}" /></td>
+						<td>{{a}}</td>
+						<td>{{b}}</td>
+					</tr>
+				</textarea>
+				
+				<div class="counters">
+					<span class="selected">0</span>/<span class="total">0</span>
+				</div>
+				
+				<div class="select-limit-controls">
+					<label>Limit</label>
+					<input value="" size="5" />
+					<span class="increment"></span>
+					<span class="decrement"></span>
+				</div>
+				
+			</caption>
+			<thead>
+				<tr>
+					<td><input type="checkbox" checked /></td>
+					<td data-col="a">A</td>
+					<td data-col="b">B</td>
+				</tr>
+			<thead>
+			<tfoot></tfoot>
+			<tbody></tbody>
+		</table>
+		
+	</body>
+</html>

@@ -130,12 +130,10 @@ function sortByMultiple() {
 			} else {
 				_2 = 1;
 			}
-			if (typeof a[_0[_i][0]] === 'string' && typeof b[_0[_i][0]] === 'string') {
-				_1 = _1 || a[_0[_i][0]].localeCompare(b[_0[_i][0]]) * _2; 
-			} else if (!isNaN(parseInt(a[_0[_i][0]], 10)) && !isNaN(parseInt(b[_0[_i][0]], 10))) {
+			if (!isNaN(parseInt(a[_0[_i][0]], 10)) && !isNaN(parseInt(a[_0[_i][0]], 10))) {
 				_1 = _1 || (parseInt(a[_0[_i][0]], 10) - parseInt(b[_0[_i][0]], 10)) * _2;
 			} else {
-				_1 = _1 || (a[_0[_i][0]] > b[_0[_i][0]]) * _2;
+				_1 = _1 || (a[_0[_i][0]] > b[_0[_i][0]] ? 1 : (a[_0[_i][0]] === b[_0[_i][0]] ? 0 : -1)) * _2;
 			}
 		}
 		return _1;
@@ -191,14 +189,19 @@ function updateSelectionLength(options) {
 function registerSelectionChangeHandlers(options) {
 	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
-	for (var i = 0, l = boxes.length; i < l; i += 1) {
-		boxes[i].addEventListener('change', function () {
-			if (options.selected.length === options.limit) {
-				this.checked = false;
-			}
-			onSelectionChange(boxes, options);
-		});
-	}
+	boxes.listener = function () {
+		if (options.selected.length === options.limit) {
+			this.checked = false;
+		}
+		onSelectionChange(boxes, options);
+	};
+	Array.prototype.map.call(boxes, function (o) {
+		if (!o.listener || o.listener !== boxes.listener) {
+			o.addEventListener('change', boxes.listener);
+			o.listener = boxes.listener;
+		}
+	})
+	
 
 	options.table.querySelector('thead tr td:first-child > input[type="checkbox"]').addEventListener('change', function (e) {
 		if (!e.target.checked) {
@@ -225,7 +228,7 @@ function registerSelectionChangeHandlers(options) {
 		onSelectionChange(boxes, options);
 	});
 
-	onSelectionChange(boxes, options);
+	// onSelectionChange(boxes, options);
 }
 
 function registerMouseClickHandlers(options) {
@@ -234,7 +237,7 @@ function registerMouseClickHandlers(options) {
 	off = options.table.querySelectorAll('.off > b'),
 	on = options.table.querySelectorAll('.on > b');
 	
-	var update = function () {
+	var update = function (options) {
 		options.data.sort(sortByMultiple.apply(null, options.sort));
 		renderTableHeader(options);
 		renderTableBody(options);
@@ -247,7 +250,6 @@ function registerMouseClickHandlers(options) {
 		e.stopPropagation();
 		var col = e.target.parentNode.parentNode,
 		ord,
-		name;
 		name = col.getAttribute('data-col');
 		if (e.target.parentNode.classList.contains('asc')) {
 			ord = '<';
@@ -260,10 +262,10 @@ function registerMouseClickHandlers(options) {
 				}
 				return o;
 			});
-		update();
+		update(options);
 	};
 	Array.prototype.map.call(vsort, function (o) {
-		if (!o.listener || o.listener != vsort.listener) {
+		if (!o.listener || o.listener !== vsort.listener) {
 			o.addEventListener('click', vsort.listener);
 		}
 		o.listener = vsort.listener;
@@ -278,16 +280,17 @@ function registerMouseClickHandlers(options) {
 				a = options.sort[priority - 1];
 				options.sort[priority - 1] = options.sort[priority];
 				options.sort[priority] = a;
+				update(options);
 			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sort.length - 1) {
 				a = options.sort[priority];
 				options.sort[priority] = options.sort[priority + 1];
 				options.sort[priority + 1] = a;
+				update(options);
 			}
-			update();
 		}
 	};
 	Array.prototype.map.call(hsort, function (o) {
-		if (!o.listener || o.listener != hsort.listener) {
+		if (!o.listener || o.listener !== hsort.listener) {
 			o.addEventListener('click', hsort.listener);
 		}
 		o.listener = hsort.listener;
@@ -298,11 +301,11 @@ function registerMouseClickHandlers(options) {
 		p = parseInt(col.getAttribute('data-priority'));
 		if (p > -1) {				
 			options.sort.splice(p, 1);
-			update();
+			update(options);
 		}
 	};
 	Array.prototype.map.call(off, function (o){
-		if (!o.listener || o.listener != off.listener) {
+		if (!o.listener || o.listener !== off.listener) {
 			o.addEventListener('click', off.listener);
 		}
 		o.listener = off.listener;
@@ -319,11 +322,11 @@ function registerMouseClickHandlers(options) {
 		p = c.indexOf(col.getAttribute('data-col'));
 		if (p < 0) {
 			options.sort.push([col.getAttribute('data-col'), '<']);
-			update();
+			update(options);
 		}
 	};
 	Array.prototype.map.call(on, function (o) {
-		if (!o.listener || o.listener != on.listener) {
+		if (!o.listener || o.listener !== on.listener) {
 			o.addEventListener('click', on.listener);
 		}
 		o.listener = on.listener;
@@ -395,7 +398,7 @@ function renderTableHeader(options) {
 			'<div class="hsort dec"><b></b></div>',
 			'<div class="hsort inc"><b></b></div>',
 			'<div class="off"><b></b></div>',
-			'<div class="vsort on"><b></b></div>', 
+			'<div class="on"><b></b></div>', 
 			'</td>'
 		].join('');
 	}
@@ -446,7 +449,7 @@ function renderTable(options) {
 	options = augment({
 			table : 'table',
 			data : [],
-			limit : 100,
+			limit : -1,
 			sort : [],
 			selected : 0,
 			hueOffset : 30,
@@ -455,6 +458,9 @@ function renderTable(options) {
 			brightness : 100
 		}, options);
 
+	if (options.limit < 0) {
+		options.limit = data.length;
+	}
 	options.table = document.querySelector(options.table);
 
 	renderTableHeader(options);

@@ -1,78 +1,275 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8" />
-		<title>Multisorting table tests</title>
+		<title>Multisort UX tests</title>
+		<meta charset="utf8" />
 		<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.20.0.css">
+		<link rel="stylesheet" media="all" type="text/css" href="css/multisort-ux-2.css" />
 		<script src="http://code.jquery.com/qunit/qunit-1.20.0.js"></script>
-		<script src="js/multisort-u.js"></script>
-		<script>
-			var data;
-			function onData (result) {
-				data = result.collection;
-			}
-			//QUnit.module('Obtain data');
-			QUnit.test('test onData function exists', function (assert) {
-				assert.ok(typeof onData == 'function', 'callback exists');
-				assert.ok(typeof Array.isArray == 'function', 'isArray exists');
-				assert.ok(Array.isArray(data), 'we have data');
-			});
-			//QUnit.module('templating');
-			QUnit.test('reindeing array shifting index 3 to index 2', function(assert) {
-				var testArray = [], a, b, p, x;
-				
-				assert.notOk(testArray.length, 'empty array');
-				for (var i = 0; i < 10; i += 1) {
-					testArray[i] = [i.toString(10)];
-				}
-				assert.equal(testArray.length, 10);
-				assert.notOk(testArray[testArray.length], 'index out of reach');
-				assert.equal(testArray[testArray.length - 1], testArray[9]);
-				
-				a = testArray[3];
-				b = testArray[2];
-				p = 3;
-				assert.equal(testArray[3], a);
-				
-				// shifting up
-				x = testArray[p - 1];
-				testArray[p - 1] = testArray[p];
-				testArray[p] = x;
-				
-				assert.equal(testArray.length, 10);
-				assert.equal(testArray[2], a);
-				assert.equal(testArray[3], b);
-			});
-			QUnit.test('reindeing array pushing index 3 to index 4', function(assert) {
-				var testArray = [], a, b, p, x;
-				assert.notOk(testArray.length, 'empty array');
-				for (var i = 0; i < 10; i += 1) {
-					testArray[i] = [i.toString(10), '+'];
-				}
-				assert.equal(testArray.length, 10);
-				assert.notOk(testArray[testArray.length], 'index out of reach');
-				assert.equal(testArray[testArray.length - 1], testArray[9]);
-				
-				a = testArray[3];
-				b = testArray[4];
-				p = 3;
-				assert.equal(testArray[3], a);
-				
-				// pushing down
-				x = testArray[p];
-				testArray[p] = testArray[p + 1];
-				testArray[p + 1] = x;
-				
-				assert.equal(testArray.length, 10);
-				assert.equal(testArray[3], b);
-				assert.equal(testArray[4], a);
-			});
+		<script src="js/multisort-ux-2.js" type="text/javascript"></script>
+		<script type="text/javascript">
+		if (typeof Array.prototype.getUnique != 'undefined') {
+			console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+		}
+		Array.prototype.getUnique = function(){
+		   var u = {}, a = [];
+		   for(var i = 0, l = this.length; i < l; i += 1){
+			  if(u.hasOwnProperty(this[i])) {
+				 continue;
+			  }
+			  a.push(this[i]);
+			  u[this[i]] = 1;
+		   }
+		   return a;
+		}
+		Object.defineProperty(Array.prototype, "getUnique", {enumerable: false});
 		</script>
-		<script src="data.php"></script>
+		<script type="text/javascript">
+		
+		function getMatrix(l) {	
+			var f = [], i = 0, b, m = [], p, w = 0;
+			
+			function factorial (n) {
+				if (n == 0 || n == 1) {
+					return 1;
+				}
+				if (f[n] > 0) {
+					return f[n];
+				}
+				return f[n] = factorial(n-1) * n;
+			} 
+			
+			b = Array.apply(null, Array(l)).map(Number.prototype.valueOf,0);
+			l = factorial(l*2)/Math.pow(f[l], 2);
+			p = Math.round(l / b.length);
+				
+			for (; i < l; i += 1) {
+				if (i > 0) {
+					if (i % p) {
+						w +=1;
+						if (w === b.length) {
+							w = 0;
+						}
+					}
+					b[w] += 1;
+				}
+				console.log(b);
+				m.push(b.slice(0));
+			}
+			
+			return m;
+		}
+		
+		function getData(d) {
+			var data = [],
+			a = getLetters(), 
+			c,
+			i = 0, 
+			l = d.length, 
+			o,
+			r,
+			t;
+			
+			for (; i < l; i += 1) {
+				o = {};
+				o.id = i + 1;
+				r = d[i]; 
+				if (!c) c = r.length;
+				for(t = 0; t < c; t += 1) {
+					o[a[t]] = r[t];
+				}
+				data.push(o);
+			}
+			return data;
+		}
+		
+		QUnit.test('reindeing array shifting index 3 to index 2', function(assert) {
+			var testArray = [], a, b, p, x;
+			
+			assert.notOk(testArray.length, 'empty array');
+			for (var i = 0; i < 10; i += 1) {
+				testArray[i] = [i.toString(10)];
+			}
+			assert.equal(testArray.length, 10);
+			assert.notOk(testArray[testArray.length], 'index out of reach');
+			assert.equal(testArray[testArray.length - 1], testArray[9]);
+			
+			a = testArray[3];
+			b = testArray[2];
+			p = 3;
+			assert.equal(testArray[3], a);
+			
+			// shifting up
+			x = testArray[p - 1];
+			testArray[p - 1] = testArray[p];
+			testArray[p] = x;
+			
+			assert.equal(testArray.length, 10);
+			assert.equal(testArray[2], a);
+			assert.equal(testArray[3], b);
+		});
+		QUnit.test('reindeing array pushing index 3 to index 4', function(assert) {
+			var testArray = [], a, b, p, x;
+			assert.notOk(testArray.length, 'empty array');
+			for (var i = 0; i < 10; i += 1) {
+				testArray[i] = [i.toString(10), '+'];
+			}
+			assert.equal(testArray.length, 10);
+			assert.notOk(testArray[testArray.length], 'index out of reach');
+			assert.equal(testArray[testArray.length - 1], testArray[9]);
+			
+			a = testArray[3];
+			b = testArray[4];
+			p = 3;
+			assert.equal(testArray[3], a);
+			
+			// pushing down
+			x = testArray[p];
+			testArray[p] = testArray[p + 1];
+			testArray[p + 1] = x;
+			
+			assert.equal(testArray.length, 10);
+			assert.equal(testArray[3], b);
+			assert.equal(testArray[4], a);
+		});
+		
+		QUnit.test('multi sorting: running tests on two column table', function (assert) {
+
+/*
+ab Ab 
+AB aB 
+  
+ba Ba
+BA bA
+*/
+			var pattern = ['ab','Ab','AB','aB','Ba','BA','bA','ba'];
+
+			var data = getData(getMatrix(2)), tests = {};
+			tests.individualResults = {};
+			tests.totalResults = [];
+			
+			pattern.map(function (s) {
+				var r = s.split('');
+				tests[s] = [];
+				for (var i = 0, l = r.length; i < l; i += 1) {
+					tests[s].push([r[i].toLowerCase(), r[i] === r[i].toLowerCase() ? '<' : '>']);
+				}
+			});
+			
+			function storeResults(test, result) {
+				tests.individualResults[test] = result.map(function (o) {
+					return o.id;
+				});
+				tests.totalResults.push(tests.individualResults[test]);
+			};
+			
+			for (var test in tests) {
+				(function (test) {
+					if (['individualResults', 'totalResults'].indexOf(test) < 0) {
+						storeResults(test, data.sort(sortByMultiple.apply(null, tests[test])).slice(0));
+					}
+				})(test);
+			}
+			
+			var unique = tests.totalResults.map(function (i) {
+				return i.join('');
+			});
+			
+			assert.equal(unique.getUnique().length, 6);
+		});
+		
+		QUnit.test('multi sorting: running tests on three column table', function (assert) {
+/*
+
+abc Abc aBc abC 
+ABC ABc AbC aBC
+
+bac Bac bAc baC   
+BAC BAc BaC bAC
+
+bca Bca bCa bcA
+BCA BCa BcA bCA
+
+cba Cba cBa cbA
+CBA CBa CbA cBA
+*/		
+
+			var pattern = ['abc','Abc','aBc','abC','ABC','ABc','AbC','aBC','bac','Bac','bAc','baC','BAC','BAc','BaC','bAC','bca','Bca','bCa','bcA','BCA','BCa','BcA','bCA','cba','Cba','cBa','cbA','CBA','CBa','CbA','cBA'];
+		
+			var data, tests = {};
+			tests.individualResults = {};
+			tests.totalResults = [];
+			
+			pattern.map(function (s) {
+				var r = s.split('');
+				tests[s] = [];
+				for (var i = 0, l = r.length; i < l; i += 1) {
+					tests[s].push([r[i].toLowerCase(), r[i] === r[i].toLowerCase() ? '<' : '>']);
+				}
+			});
+			
+			function storeResults(test, result) {
+				tests.individualResults[test] = result.map(function (o) {
+					return o.id;
+				});
+				tests.totalResults.push(tests.individualResults[test]);
+			};
+			
+			data = getData(getMatrix(3));
+			
+			for (var test in tests) {
+				(function (test) {
+					if (['individualResults', 'totalResults'].indexOf(test) < 0) {
+						storeResults(test, data.sort(sortByMultiple.apply(null, tests[test])).slice(0));
+					}
+				})(test);
+			}
+			
+			var unique = tests.totalResults.map(function (i) {
+				return i.join('');
+			});
+			assert.equal(unique.getUnique().length, 20);
+		});
+		
+		</script>
 	</head>
 	<body>
-	
-	<div id="qunit"></div>
-	
+		
+		<div id="qunit"></div>
+
+		<div id="qunit-fixture">
+			<table id="my-table" class="basic">
+				<caption>
+					<textarea>
+						<tr>
+							<td><input type="checkbox" {{checked}} value="{{id}}" /></td>
+							<td>{{a}}</td>
+							<td>{{b}}</td>
+						</tr>
+					</textarea>
+					
+					<div class="counters">
+						<span class="selected">0</span>/<span class="total">0</span>
+					</div>
+					
+					<div class="select-limit-controls">
+						<label>Limit</label>
+						<input value="" size="5" />
+						<span class="increment"></span>
+						<span class="decrement"></span>
+					</div>
+					
+				</caption>
+				<thead>
+					<tr>
+						<td><input type="checkbox" checked /></td>
+						<td data-col="a">A</td>
+						<td data-col="b">B</td>
+					</tr>
+				<thead>
+				<tfoot></tfoot>
+				<tbody></tbody>
+			</table>
+		</div>
 	</body>
 </html>
