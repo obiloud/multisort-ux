@@ -11,7 +11,7 @@
 		<script type="text/javascript">
 		
 		function getMatrix(r, c) {	
-			var i = 0, l, b, m = [], p, w = 0, log = 1;
+			var i = 0, l, b, m = [], p, w = 0, log = 0;
 			
 			b = Array.apply(null, Array(c)).map(Number.prototype.valueOf,0);
 			l = r;
@@ -102,11 +102,13 @@
 			}
 			buffer = buffer.getUnique();
 			
-			(function () {
-				for (var i = 0, l = buffer.length; i < l; i += 1) {
-					console.log('test case:', buffer[i]);
+			(function (print) {
+				if (print) {
+					for (var i = 0, l = buffer.length; i < l; i += 1) {
+						console.log('test case:', buffer[i]);
+					}
 				}
-			})();
+			})(0);
 			
 			buffer.map(function (s) {
 				var r = s.split('');
@@ -166,16 +168,16 @@
 			assert.equal(testArray[4], a, 'referenced array ( a ) can be found on higher index');
 		});
 		
-		function compareResults(assert, expected, tests) {
+		function compareResults(assert, expected, testResults) {
 			var last = '', cnt = 0;
-			for (var r in tests.individualResults) {
+			for (var r in testResults.individualResults) {
 				(function (current) {
 					if (!last)  {
 						last = current;
 					} else {
-						if (tests.individualResults[last].join('') == tests.individualResults[current].join('')) {
-							console.log(last, tests.individualResults[last].join(''));
-							console.log(current, tests.individualResults[current].join(''));
+						if (testResults.individualResults[last].join('') == testResults.individualResults[current].join('')) {
+							console.log(last, testResults.individualResults[last].join(''));
+							console.log(current, testResults.individualResults[current].join(''));
 							last = '';
 						}
 					}
@@ -183,140 +185,87 @@
 				cnt++;
 			}
 			
-			assert.ok(last, 'no duplicate results found in individual tests');
+			assert.ok(last, 'no duplicate results found in individual testResults');
 			
-			var unique = tests.totalResults.map(function (i) {
+			var unique = testResults.totalResults.map(function (i) {
 				return i.join('');
 			});
 			
-			assert.equal(unique.length, expected, 'all tests passed');
+			assert.equal(unique.length, expected, 'all testResults passed');
 			assert.equal(unique.getUnique().length, expected, 'result length unchanged after filtering duplicates');
 		}
 		
+		function runNTest(numColumns, assert, callback) {
 		
-		QUnit.test('multi sorting: running tests on two column table', function (assert) {
-			var pattern = getPattern(2), data = formatData(getMatrix(pattern.expected, 2)), tests = {};
-			tests.individualResults = {};
-			tests.totalResults = [];
+			var pattern = getPattern(numColumns), data = formatData(getMatrix(pattern.expected, numColumns)), testResults = {};
+			testResults.individualResults = {};
+			testResults.totalResults = [];
 			
 			function storeResults(test, result) {
-				tests.individualResults[test] = result.map(function (o) {
+				testResults.individualResults[test] = result.map(function (o) {
 					return o.id;
 				});
-				tests.totalResults.push(tests.individualResults[test]);
+				testResults.totalResults.push(testResults.individualResults[test]);
 			};
 			
 			for (var test in pattern) {
 				if (test === "expected") continue;
-				(function (test) {
-					storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[test])));
-				})(test);
+				storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[test])));
 			}
 			
-			compareResults(assert, pattern.expected, tests);
-			
+			if (typeof callback === 'function') {
+				callback(data, testResults);
+			} else {
+				compareResults(assert, pattern.expected, testResults);
+			}
+		}
+		
+		QUnit.test('multi sorting: running tests on two column table', function (assert) {
+			runNTest(2, assert);
 		});
 		
 		QUnit.test('multi sorting: running tests on three column table', function (assert) {
-
-			var pattern = getPattern(3), data = formatData(getMatrix(pattern.expected, 3)), tests = {};
-			tests.individualResults = {};
-			tests.totalResults = [];
-			
-			function storeResults(test, result) {
-				tests.individualResults[test] = result.map(function (o) {
-					return o.id;
-				});
-				tests.totalResults.push(tests.individualResults[test]);
-			};
-			
-			for (var test in pattern) {
-				if (test === "expected") continue;
-				(function (t) {
-					if (['individualResults', 'totalResults'].indexOf(t) < 0) {
-						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[t])));
-					}
-				})(test);
-			}
-			
-			compareResults(assert, pattern.expected, tests);
+			runNTest(3, assert);
 		});
 		
 		QUnit.test('multi sorting: running tests on four column table', function (assert) {
-
-			var pattern = getPattern(4), data = formatData(getMatrix(pattern.expected, 4)), tests = {};
-			tests.individualResults = {};
-			tests.totalResults = [];
-			
-			function storeResults(test, result) {
-				tests.individualResults[test] = result.map(function (o) {
-					return o.id;
-				});
-				tests.totalResults.push(tests.individualResults[test]);
-			};
-			
-			for (var test in pattern) {
-				if (test === "expected") continue;
-				(function (t) {
-					if (['individualResults', 'totalResults'].indexOf(t) < 0) {
-						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[t])));
-					}
-				})(test);
-			}
-			
-			compareResults(assert, pattern.expected, tests);
+			runNTest(4, assert)
 		});
 		
 		QUnit.test('multi sorting: running tests on five column table', function (assert) {
-
-			var pattern = getPattern(5), data = formatData(getMatrix(pattern.expected, 5)), tests = {};
-			tests.individualResults = {};
-			tests.totalResults = [];
-			
-			function storeResults(test, result) {
-				tests.individualResults[test] = result.map(function (o) {
-					return o.id;
-				});
-				tests.totalResults.push(tests.individualResults[test]);
-			};
-			
-			for (var test in pattern) {
-				if (test === "expected") continue;
-				(function (t) {
-					if (['individualResults', 'totalResults'].indexOf(t) < 0) {
-						storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[t])));
-					}
-				})(test);
-			}
-			
-			compareResults(assert, pattern.expected, tests);
+			runNTest(5, assert);
 		});
 		
-		QUnit.test('testing checkboxes and event handlers', function(assert) {
+		QUnit.test('testing buttons, checkboxes and event handlers', function (assert) {
 			
-			var sortPattern = [], pattern = getPattern(2), data = formatData(getMatrix(pattern.expected, 2));
-			
-			var done = assert.async();
-			
-			document.querySelector('#my-table').addEventListener('selection', function (e) {
-				assert.ok(e.detail, 'custom event supported');
-				done();
+			runNTest(2, assert, function (data, testResults) {
+								
+				var done = assert.async(2), btn2Clicked = false;
+				
+				document.querySelector('#my-table').addEventListener('selection', (function (results) {
+					return function (e) {
+						if (btn2Clicked) {
+							assert.equal(results.ab.join(''), e.detail.selected.join(''), 'both buttons clicked: sort case ab');
+						} else {
+							assert.ok(e.detail, 'CustomEvent supported');
+						}
+						done();
+					};
+				})(testResults.individualResults));
+				
+				renderTable({
+					'data' : data
+				});
+				
+				var onbtns = document.querySelectorAll('.on b');
+				assert.equal(onbtns.length, 2, 'table is rendered and we have buttons');
+				onbtns[0].dispatchEvent(new MouseEvent('click'));
+				setTimeout(function () {
+					btn2Clicked = true;
+					onbtns[1].dispatchEvent(new MouseEvent('click'));
+				}, 10);
 			});
 			
-			for (var test in pattern) {
-				if (test === "expected") continue;
-				(function (t) {
-					sortPattern.push(pattern[test]);
-				})(test);
-			}
-			renderTable({
-				'data' : data,
-				'sortPattern' : sortPattern
-			});
-			
-			var onbtns = document.querySelectorAll('.on b');
-			assert.equal(onbtns.length, 2, 'table is rendered and we have buttons');
-			onbtns[0].dispatchEvent(new MouseEvent('click'));
 		});
 		
 		</script>
