@@ -126,48 +126,44 @@
 			for (var i = 0; i < 10; i += 1) {
 				testArray[i] = [i.toString(10)];
 			}
-			assert.equal(testArray.length, 10);
+			assert.equal(testArray.length, 10, 'array length is correct');
 			assert.notOk(testArray[testArray.length], 'index out of reach');
-			assert.equal(testArray[testArray.length - 1], testArray[9]);
+			assert.equal(testArray[testArray.length - 1], testArray[9], 'elements are indexed correct');
 			
 			a = testArray[3];
 			b = testArray[2];
 			p = 3;
-			assert.equal(testArray[3], a);
+			
+			assert.equal(testArray[3], a, 'arrays in arrays are stored by referrence');
 			
 			// shifting up
 			x = testArray[p - 1];
 			testArray[p - 1] = testArray[p];
 			testArray[p] = x;
 			
-			assert.equal(testArray.length, 10);
-			assert.equal(testArray[2], a);
-			assert.equal(testArray[3], b);
+			assert.equal(testArray.length, 10, 'length of the array is unchanged');
+			assert.equal(testArray[2], a, 'referenced array ( a ) can be found on lower index');
+			assert.equal(testArray[3], b, 'referenced array ( b ) can be found on higher index');
 		});
 		
 		QUnit.test('reindexing array pushing index 3 to index 4', function(assert) {
 			var testArray = [], a, b, p, x;
-			assert.notOk(testArray.length, 'empty array');
 			for (var i = 0; i < 10; i += 1) {
 				testArray[i] = [i.toString(10), '+'];
 			}
-			assert.equal(testArray.length, 10);
-			assert.notOk(testArray[testArray.length], 'index out of reach');
-			assert.equal(testArray[testArray.length - 1], testArray[9]);
 			
 			a = testArray[3];
 			b = testArray[4];
 			p = 3;
-			assert.equal(testArray[3], a);
 			
 			// pushing down
 			x = testArray[p];
 			testArray[p] = testArray[p + 1];
 			testArray[p + 1] = x;
 			
-			assert.equal(testArray.length, 10);
-			assert.equal(testArray[3], b);
-			assert.equal(testArray[4], a);
+			assert.equal(testArray.length, 10, 'length of the array is unchanged');
+			assert.equal(testArray[3], b, 'referenced array ( b ) can be found on lower index');
+			assert.equal(testArray[4], a, 'referenced array ( a ) can be found on higher index');
 		});
 		
 		function compareResults(assert, expected, tests) {
@@ -187,14 +183,14 @@
 				cnt++;
 			}
 			
-			assert.ok(last);
+			assert.ok(last, 'no duplicate results found in individual tests');
 			
 			var unique = tests.totalResults.map(function (i) {
 				return i.join('');
 			});
 			
-			assert.equal(unique.length, expected);
-			assert.equal(unique.getUnique().length, expected);
+			assert.equal(unique.length, expected, 'all tests passed');
+			assert.equal(unique.getUnique().length, expected, 'result length unchanged after filtering duplicates');
 		}
 		
 		
@@ -296,7 +292,32 @@
 			compareResults(assert, pattern.expected, tests);
 		});
 		
-		
+		QUnit.test('testing checkboxes and event handlers', function(assert) {
+			
+			var sortPattern = [], pattern = getPattern(2), data = formatData(getMatrix(pattern.expected, 2));
+			
+			var done = assert.async();
+			
+			document.querySelector('#my-table').addEventListener('selection', function (e) {
+				assert.ok(e.detail, 'custom event supported');
+				done();
+			});
+			
+			for (var test in pattern) {
+				if (test === "expected") continue;
+				(function (t) {
+					sortPattern.push(pattern[test]);
+				})(test);
+			}
+			renderTable({
+				'data' : data,
+				'sortPattern' : sortPattern
+			});
+			
+			var onbtns = document.querySelectorAll('.on b');
+			assert.equal(onbtns.length, 2, 'table is rendered and we have buttons');
+			onbtns[0].dispatchEvent(new MouseEvent('click'));
+		});
 		
 		</script>
 	</head>

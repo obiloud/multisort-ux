@@ -238,7 +238,7 @@ function registerMouseClickHandlers(options) {
 	on = options.table.querySelectorAll('.on > b');
 	
 	var update = function (options) {
-		options.data.sort(sortByMultiple.apply(null, options.sort));
+		options.data.sort(sortByMultiple.apply(null, options.sortPattern));
 		renderTableHeader(options);
 		renderTableBody(options);
 		registerSelectionChangeHandlers(options);
@@ -256,7 +256,7 @@ function registerMouseClickHandlers(options) {
 		} else {
 			ord = '>';
 		}
-		options.sort = options.sort.map(function (o, i) {
+		options.sortPattern = options.sortPattern.map(function (o, i) {
 				if (o[0] === name) {
 					o[1] = ord;
 				}
@@ -277,14 +277,14 @@ function registerMouseClickHandlers(options) {
 		a;
 		if (priority > -1) {				
 			if (e.target.parentNode.classList.contains('inc') && priority > 0) {
-				a = options.sort[priority - 1];
-				options.sort[priority - 1] = options.sort[priority];
-				options.sort[priority] = a;
+				a = options.sortPattern[priority - 1];
+				options.sortPattern[priority - 1] = options.sortPattern[priority];
+				options.sortPattern[priority] = a;
 				update(options);
-			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sort.length - 1) {
-				a = options.sort[priority];
-				options.sort[priority] = options.sort[priority + 1];
-				options.sort[priority + 1] = a;
+			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sortPattern.length - 1) {
+				a = options.sortPattern[priority];
+				options.sortPattern[priority] = options.sortPattern[priority + 1];
+				options.sortPattern[priority + 1] = a;
 				update(options);
 			}
 		}
@@ -300,7 +300,7 @@ function registerMouseClickHandlers(options) {
 		var col = e.target.parentNode.parentNode;
 		p = parseInt(col.getAttribute('data-priority'));
 		if (p > -1) {				
-			options.sort.splice(p, 1);
+			options.sortPattern.splice(p, 1);
 			update(options);
 		}
 	};
@@ -318,10 +318,10 @@ function registerMouseClickHandlers(options) {
 				c.push(a[i][0]);
 			}
 			return c;
-		})(options.sort);
+		})(options.sortPattern);
 		p = c.indexOf(col.getAttribute('data-col'));
 		if (p < 0) {
-			options.sort.push([col.getAttribute('data-col'), '<']);
+			options.sortPattern.push([col.getAttribute('data-col'), '<']);
 			update(options);
 		}
 	};
@@ -371,7 +371,7 @@ function renderTableHeader(options) {
 	crow = '<tr class="c multirow"><td></td>',
 	c = [],
 	i = 0, 
-	l = options.sort.length, 
+	l = options.sortPattern.length, 
 	n = 0, 
 	z = cols.length;	
 	
@@ -386,7 +386,7 @@ function renderTableHeader(options) {
 			c.push(a[i][0]);
 		}
 		return c;
-	})(options.sort);
+	})(options.sortPattern);
 	
 	for (; n < z; n += 1) {		
 		crow += [
@@ -408,14 +408,14 @@ function renderTableHeader(options) {
 		html += ['<td style="background-color:rgb(', options.colors[i], ')">', letters[i], '</td>'].join('');
 		
 		for (n = 0; n < z; n += 1) {
-			if (cols[n].getAttribute('data-col') === options.sort[i][0]) {										
+			if (cols[n].getAttribute('data-col') === options.sortPattern[i][0]) {										
 				html += [
 					'<td data-col="', 
-					options.sort[i][0], 
+					options.sortPattern[i][0], 
 					'"><div class="vsort',
-					(options.sort[i][1] !== '<' ? ' asc' : ''),
+					(options.sortPattern[i][1] !== '<' ? ' asc' : ''),
 					'"><b style="border-',
-					(options.sort[i][1] !== '<' ? 'bottom' : 'top'),
+					(options.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
 					'-color: rgb(',
 					options.colors[i],
 					');"></b></div></td>'
@@ -450,7 +450,7 @@ function renderTable(options) {
 			table : 'table',
 			data : [],
 			limit : -1,
-			sort : [],
+			sortPattern : [],
 			selected : 0,
 			hueOffset : 30,
 			maxHueShift : 120,
@@ -459,13 +459,13 @@ function renderTable(options) {
 		}, options);
 
 	if (options.limit < 0) {
-		options.limit = data.length;
+		options.limit = options.data.length;
 	}
 	options.table = document.querySelector(options.table);
 
 	renderTableHeader(options);
 
-	options.data.sort(sortByMultiple.apply(null, options.sort));
+	options.data.sort(sortByMultiple.apply(null, options.sortPattern));
 
 	options.table.addEventListener('selection', function (e) {
 		options.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
