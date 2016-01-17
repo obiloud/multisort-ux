@@ -235,6 +235,18 @@
 			runNTest(5, assert);
 		});
 		
+		QUnit.test('attempt to facade events in internet explorer', function (assert) {
+			expect(1);
+			var done = assert.async(1);
+			var t = document.querySelector('#my-table');
+			t.addEventListener('hack', function (e) {
+				assert.ok(e.detail, 'I hacked it!');
+				done();
+			});
+			var e = getEvent('hack', {detail : 1});
+			t.dispatchEvent(e);
+		});
+		
 		QUnit.test('testing buttons and event handlers', function (assert) {
 			
 			runNTest(2, assert, function (data, testResults) {
@@ -258,12 +270,36 @@
 				
 				var onbtns = document.querySelectorAll('.on b');
 				assert.equal(onbtns.length, 2, 'table is rendered and we have buttons');
-				onbtns[0].dispatchEvent(new MouseEvent('click'));
+				onbtns[0].dispatchEvent(getEvent('click'));
 				setTimeout(function () {
 					btn2Clicked = true;
-					onbtns[1].dispatchEvent(new MouseEvent('click'));
+					onbtns[1].dispatchEvent(getEvent('click'));
 				}, 10);
 			});
+			
+			var ctrlcells = document.querySelectorAll('#my-table thead tr.c td:not(:first-child)');
+			assert.equal(ctrlcells.length, 2, 'controll cells rendered for each column');
+			
+			var children = ctrlcells[0].childNodes;
+			assert.equal(children.length, 4, '.on .off .inc .dec controls');
+			for (var i = children.length - 1, classNames = 'dec on off inc'.split(' '); i > -1; --i) {
+				assert.ok(children[i].classList.contains(classNames[i]), ['controll (', classNames[i], ') in right position'].join(''));
+			}
+		});
+		
+		QUnit.test('select all checkbox ans select range tests', function (assert) {
+			var data = formatData(getMatrix(8, 2));
+			
+			renderTable({
+				'data' : data
+			});
+			
+			
+			var all = document.querySelectorAll('#my-table thead input[type="checkbox"]');
+			assert.ok(all.length === 1, 'only one checkbox is in table header');
+			assert.ok(all[0].checked, 'by default it is checked');
+			
+			
 			
 		});
 		

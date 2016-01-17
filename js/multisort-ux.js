@@ -2,6 +2,26 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+function getEvent(type, init) {
+	var event;
+	try {
+		if ('click' === type) {
+			event = new MouseEvent(type);
+		} else {
+			event = new CustomEvent(type, init);
+		}
+	} catch (e) {
+		if ('click' === type) {
+			event = document.createEvent('MouseEvent');
+			event.initEvent(type, 0, 0);
+		} else {
+			event = document.createEvent('CustomEvent');
+			event.initCustomEvent(type, false, false, init.detail);
+		}
+	}
+	return event;
+}
+ 
 function augment(target, source) {
 	for (var i in source) {
 		if (source.hasOwnProperty(i)) {
@@ -156,7 +176,7 @@ function onSelectionChange(boxes, options) {
 		}).call(boxes[i]);
 	}
 
-	options.table.dispatchEvent(new CustomEvent('selection', {
+	options.table.dispatchEvent(getEvent('selection', {
 			detail : {
 				data : options.data,
 				selected : options.selected
@@ -396,9 +416,9 @@ function renderTableHeader(options) {
 			c.indexOf(cols[n].getAttribute('data-col')),
 			'>', 
 			'<div class="hsort dec"><b></b></div>',
-			'<div class="hsort inc"><b></b></div>',
-			'<div class="off"><b></b></div>',
 			'<div class="on"><b></b></div>', 
+			'<div class="off"><b></b></div>',
+			'<div class="hsort inc"><b></b></div>',
 			'</td>'
 		].join('');
 	}

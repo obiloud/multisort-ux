@@ -198,10 +198,12 @@ table.basic thead tr.multirow.c .hsort {
 	width: 34px;
 }
 table.basic thead tr.multirow.c .hsort.dec {
-	left: 0;
+	margin-left: -50px;
+	left: 50%;
 }
 table.basic thead tr.multirow.c .hsort.inc {
-	right: 0;
+	margin-right: -50px;
+	right: 50%;
 }
 
 table.basic thead tr.multirow.c .hsort > b {
