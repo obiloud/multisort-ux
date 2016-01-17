@@ -130,7 +130,11 @@ function sortByMultiple() {
 			} else {
 				_2 = 1;
 			}
-			_1 = _1 || (parseInt(a[_0[_i][0]], 10) - parseInt(b[_0[_i][0]], 10)) * _2;
+			if (!isNaN(parseInt(a[_0[_i][0]], 10)) && !isNaN(parseInt(a[_0[_i][0]], 10))) {
+				_1 = _1 || (parseInt(a[_0[_i][0]], 10) - parseInt(b[_0[_i][0]], 10)) * _2;
+			} else {
+				_1 = _1 || (a[_0[_i][0]] > b[_0[_i][0]] ? 1 : (a[_0[_i][0]] === b[_0[_i][0]] ? 0 : -1)) * _2;
+			}
 		}
 		return _1;
 	};
@@ -166,14 +170,14 @@ function updateSelectionLength(options) {
 	extra,
 	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]');
 
-	if (options.selected.length > options.limit) {
-		extra = options.selected.slice(options.limit - options.selected.length);
+	if (options.selected.length > options.range) {
+		extra = options.selected.slice(options.range - options.selected.length);
 		for (i = 0, l = extra.length; i < l; i += 1) {
 			options.table.querySelector(['input[value="', extra[i], '"]'].join('')).checked = false;
 		}
 	}
-	if (options.selected.length < options.limit) {
-		for (i = 0, l = options.limit; i < l; i += 1) {
+	if (options.selected.length < options.range) {
+		for (i = 0, l = options.range; i < l; i += 1) {
 			if (!boxes[i].checked) {
 				boxes[i].checked = true;
 			}
@@ -182,17 +186,22 @@ function updateSelectionLength(options) {
 	onSelectionChange(boxes, options);
 }
 
-function registerSelectChangeHandlers(options) {
+function registerSelectionChangeHandlers(options) {
 	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
-	for (var i = 0, l = boxes.length; i < l; i += 1) {
-		boxes[i].addEventListener('change', function () {
-			if (options.selected.length === options.limit) {
-				this.checked = false;
-			}
-			onSelectionChange(boxes, options);
-		});
-	}
+	boxes.listener = function () {
+		if (options.selected.length === options.range) {
+			this.checked = false;
+		}
+		onSelectionChange(boxes, options);
+	};
+	Array.prototype.map.call(boxes, function (o) {
+		if (!o.listener || o.listener !== boxes.listener) {
+			o.addEventListener('change', boxes.listener);
+			o.listener = boxes.listener;
+		}
+	})
+	
 
 	options.table.querySelector('thead tr td:first-child > input[type="checkbox"]').addEventListener('change', function (e) {
 		if (!e.target.checked) {
@@ -209,7 +218,7 @@ function registerSelectChangeHandlers(options) {
 			l = boxes.length;
 			for (; i < l; i += 1) {
 				(function () {
-					if (!this.disabled && i < options.limit) {
+					if (!this.disabled && i < options.range) {
 						this.checked = true;
 						c += 1;
 					}
@@ -219,150 +228,206 @@ function registerSelectChangeHandlers(options) {
 		onSelectionChange(boxes, options);
 	});
 
-	onSelectionChange(boxes, options);
+	// onSelectionChange(boxes, options);
 }
 
 function registerMouseClickHandlers(options) {
-	var vsort = options.table.querySelectorAll('.vsort b'),
-	hsort = options.table.querySelectorAll('.hsort b');
-
+	var vsort = options.table.querySelectorAll('.vsort > b'),
+	hsort = options.table.querySelectorAll('.hsort > b'),
+	off = options.table.querySelectorAll('.off > b'),
+	on = options.table.querySelectorAll('.on > b');
+	
+	var update = function (options) {
+		options.data.sort(sortByMultiple.apply(null, options.sortPattern));
+		renderTableHeader(options);
+		renderTableBody(options);
+		registerSelectionChangeHandlers(options);
+		registerMouseClickHandlers(options);
+		updateSelectionLength(options);
+	};
+	
+	vsort.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode,
+		ord,
+		name = col.getAttribute('data-col');
+		if (e.target.parentNode.classList.contains('asc')) {
+			ord = '<';
+		} else {
+			ord = '>';
+		}
+		options.sortPattern = options.sortPattern.map(function (o, i) {
+				if (o[0] === name) {
+					o[1] = ord;
+				}
+				return o;
+			});
+		update(options);
+	};
 	Array.prototype.map.call(vsort, function (o) {
-		o.addEventListener('click', function (e) {
-			e.stopPropagation();
-			var col = e.target.parentNode.parentNode,
-			ord,
-			name;
-			name = col.getAttribute('data-col');
-			if (e.target.parentNode.classList.contains('asc')) {
-				ord = '<';
-			} else {
-				ord = '>';
-			}
-			options.sort = options.sort.map(function (o, i) {
-					if (o[0] === name) {
-						o[1] = ord;
-					}
-					return o;
-				});
-			options.data.sort(sortByMultiple.apply(null, options.sort));
-			renderTableBody(options);
-			registerSelectChangeHandlers(options);
-			mapPrioritiesToColumns(options);
-			updateSelectionLength(options);
-		}, true);
+		if (!o.listener || o.listener !== vsort.listener) {
+			o.addEventListener('click', vsort.listener);
+		}
+		o.listener = vsort.listener;
 	});
-	Array.prototype.map.call(hsort, function (o) {
-		o.addEventListener('click', function (e) {
-			e.stopPropagation();
-			var col = e.target.parentNode.parentNode,
-			columns = options.table.querySelectorAll('td.occ'),
-			index = Array.prototype.indexOf.call(columns, col),
-			a = options.sort[index],
-			b;
-			if (e.target.parentNode.classList.contains('inc')) {
-				b = options.sort[index + 1];
-				options.sort[index + 1] = a;
-				options.sort[index] = b;
-			} else {
-				b = options.sort[index - 1];
-				options.sort[index - 1] = a;
-				options.sort[index] = b;
+	hsort.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode,
+		priority = parseInt(col.getAttribute('data-priority')),
+		a;
+		if (priority > -1) {				
+			if (e.target.parentNode.classList.contains('inc') && priority > 0) {
+				a = options.sortPattern[priority - 1];
+				options.sortPattern[priority - 1] = options.sortPattern[priority];
+				options.sortPattern[priority] = a;
+				update(options);
+			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sortPattern.length - 1) {
+				a = options.sortPattern[priority];
+				options.sortPattern[priority] = options.sortPattern[priority + 1];
+				options.sortPattern[priority + 1] = a;
+				update(options);
 			}
-			options.data.sort(sortByMultiple.apply(null, options.sort));
-			renderTableBody(options);
-			registerSelectChangeHandlers(options);
-			mapPrioritiesToColumns(options);
-			updateSelectionLength(options);
-		}, true);
+		}
+	};
+	Array.prototype.map.call(hsort, function (o) {
+		if (!o.listener || o.listener !== hsort.listener) {
+			o.addEventListener('click', hsort.listener);
+		}
+		o.listener = hsort.listener;
+	});
+	off.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode;
+		p = parseInt(col.getAttribute('data-priority'));
+		if (p > -1) {				
+			options.sortPattern.splice(p, 1);
+			update(options);
+		}
+	};
+	Array.prototype.map.call(off, function (o){
+		if (!o.listener || o.listener !== off.listener) {
+			o.addEventListener('click', off.listener);
+		}
+		o.listener = off.listener;
+	});
+	on.listener = function (e) {
+		e.stopPropagation();
+		var col = e.target.parentNode.parentNode, c = [];
+			c = (function (a) {
+			for(var i = 0, l = a.length; i < l; i += 1) {
+				c.push(a[i][0]);
+			}
+			return c;
+		})(options.sortPattern);
+		p = c.indexOf(col.getAttribute('data-col'));
+		if (p < 0) {
+			options.sortPattern.push([col.getAttribute('data-col'), '<']);
+			update(options);
+		}
+	};
+	Array.prototype.map.call(on, function (o) {
+		if (!o.listener || o.listener !== on.listener) {
+			o.addEventListener('click', on.listener);
+		}
+		o.listener = on.listener;
 	});
 }
 
 function registerSelectionLimitHandlers(options) {
-	var limiter = options.table.querySelector('caption .select-limit-controls > input');
+	var limiter = options.table.querySelector('caption .select-range-controls > input');
 
-	limiter.value = options.limit;
+	limiter.value = options.range;
 
 	limiter.addEventListener('change', function (e) {
-		options.limit = parseInt(e.target.value, 10);
+		options.range = parseInt(e.target.value, 10);
 	});
 
-	options.table.querySelector('caption .select-limit-controls > .increment').addEventListener('click', function () {
+	options.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
 		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
-		options.limit += 1;
-		if (options.limit > options.data.length) {
-			return options.limit = options.data.length;
+		options.range += 1;
+		if (options.range > options.data.length) {
+			return options.range = options.data.length;
 		}
-		limiter.value = options.limit;
+		limiter.value = options.range;
 		updateSelectionLength(options);
 	});
 
-	options.table.querySelector('caption .select-limit-controls > .decrement').addEventListener('click', function () {
+	options.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
 		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
-		options.limit -= 1;
-		if (options.limit < 0) {
-			return options.limit = 0;
+		options.range -= 1;
+		if (options.range < 0) {
+			return options.range = 0;
 		}
-		limiter.value = options.limit;
+		limiter.value = options.range;
 		updateSelectionLength(options);
 	});
 }
 
-function renderTableHead(options) {
-	var i = 0,
+function renderTableHeader(options) {
+	var th = options.table.querySelector('thead'),
 	cols = options.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
-	l = cols.length,
+	letters = getLetters(),
 	html = '',
-	letters = getLetters();
-
-	options.colors = getColors(l, options);
-
-	for (; i < l; i += 1) {
-		html += [
-			'<td style="background-color:rgb(',
-			options.colors[i],
-			');"><p>',
-			letters[i],
-			'</p><span class="hsort dec"><b></b></span><i></i><span class="hsort inc"><b></b></span></td>'
-		].join('');
-		cols[i].innerHTML += '<span class="vsort"><b></b></span>';
-	}
-	options.table.querySelector('thead tr:first-child').innerHTML += html;
-	mapPrioritiesToColumns(options);
-}
-
-function mapPrioritiesToColumns(options) {
-	var p = options.table.querySelectorAll('thead tr:first-child td:not(:first-child)'),
-	l = options.sort.length,
-	i = 0,
-	col;
-
-	Array.prototype.map.call(p, function (o) {
-		o.classList.remove('last');
-		o.querySelector('i').textContent = '';
-		return o.classList.remove('occ');
+	crow = '<tr class="c multirow"><td></td>',
+	c = [],
+	i = 0, 
+	l = options.sortPattern.length, 
+	n = 0, 
+	z = cols.length;	
+	
+	Array.prototype.map.call(th.querySelectorAll('.multirow'), function (o) {
+		return th.removeChild(o);
 	});
-
-	for (; i < l; i += 1) {
-		col = options.table.querySelector(['[data-col="', options.sort[i][0], '"]'].join(''));
-		p[i].querySelector('i').textContent += col.textContent;
-		p[i].classList.add('occ');
-
-		if (options.sort[i][1] !== '<') {
-			col.querySelector('.vsort').classList.add('asc');
-			col.querySelector('.vsort b').style.borderBottomColor = ['rgb(', options.colors[i], ')'].join('');
-		} else {
-			col.querySelector('.vsort').classList.remove('asc');
-			col.querySelector('.vsort b').style.borderTopColor = ['rgb(', options.colors[i], ')'].join('');
+	
+	options.colors = getColors(l, options);
+	
+	c = (function (a) {
+		for(var i = 0, l = a.length; i < l; i += 1) {
+			c.push(a[i][0]);
 		}
-
-		if (i === 0) {
-			p[i].classList.add('first');
-		}
-
-		if (i === l - 1) {
-			p[i].classList.add('last');
-		}
+		return c;
+	})(options.sortPattern);
+	
+	for (; n < z; n += 1) {		
+		crow += [
+			'<td data-col="', 
+			cols[n].getAttribute('data-col'), 
+			'"data-priority=',
+			c.indexOf(cols[n].getAttribute('data-col')),
+			'>', 
+			'<div class="hsort dec"><b></b></div>',
+			'<div class="hsort inc"><b></b></div>',
+			'<div class="off"><b></b></div>',
+			'<div class="on"><b></b></div>', 
+			'</td>'
+		].join('');
 	}
+	
+	for (i = 0; i < l; i += 1) {
+		html += '<tr class="multirow">';
+		html += ['<td style="background-color:rgb(', options.colors[i], ')">', letters[i], '</td>'].join('');
+		
+		for (n = 0; n < z; n += 1) {
+			if (cols[n].getAttribute('data-col') === options.sortPattern[i][0]) {										
+				html += [
+					'<td data-col="', 
+					options.sortPattern[i][0], 
+					'"><div class="vsort',
+					(options.sortPattern[i][1] !== '<' ? ' asc' : ''),
+					'"><b style="border-',
+					(options.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
+					'-color: rgb(',
+					options.colors[i],
+					');"></b></div></td>'
+				].join('');
+			} else {
+				html += '<td></td>';
+			}
+		}
+		html += '</tr>';
+	}
+	th.innerHTML = html + crow + th.innerHTML;
+	
 }
 
 function renderTableBody(options) {
@@ -373,7 +438,7 @@ function renderTableBody(options) {
 	for (; i < l; i += 1) {
 		html += template(options.table.querySelector('caption > textarea').value,
 			augment({
-				checked : i < options.limit ? 'checked' : ''
+				checked : i < options.range ? 'checked' : ''
 			}, options.data[i]));
 	}
 	options.table.querySelector('tbody').innerHTML = html;
@@ -384,8 +449,8 @@ function renderTable(options) {
 	options = augment({
 			table : 'table',
 			data : [],
-			limit : 100,
-			sort : [],
+			range : -1,
+			sortPattern : [],
 			selected : 0,
 			hueOffset : 30,
 			maxHueShift : 120,
@@ -393,11 +458,14 @@ function renderTable(options) {
 			brightness : 100
 		}, options);
 
+	if (options.range < 0) {
+		options.range = options.data.length;
+	}
 	options.table = document.querySelector(options.table);
 
-	renderTableHead(options);
+	renderTableHeader(options);
 
-	options.data.sort(sortByMultiple.apply(null, options.sort));
+	options.data.sort(sortByMultiple.apply(null, options.sortPattern));
 
 	options.table.addEventListener('selection', function (e) {
 		options.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
@@ -408,5 +476,5 @@ function renderTable(options) {
 
 	registerSelectionLimitHandlers(options);
 	registerMouseClickHandlers(options);
-	registerSelectChangeHandlers(options);
+	registerSelectionChangeHandlers(options);
 }

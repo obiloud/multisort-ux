@@ -16,7 +16,7 @@ table.basic thead td {
 	color: #fff;
 }
 
-table.basic thead tr:first-child td {
+table.basic thead tr:not(:last-child) td {
 	background-color: #333;
 }
 
@@ -28,7 +28,9 @@ table.basic tr.done td {
 	background-color: #bbb;
 	color: #fff;
 }
-
+table.basic tr td:first-child {
+	width: 40px;
+}
 table.basic tr td:first-child > input[type="checkbox"] {
 	cursor: pointer;
 	width: 32px;
@@ -52,17 +54,17 @@ table.basic caption .counters {
 	padding: 10px;
 }
 
-table.basic caption .select-limit-controls {
+table.basic caption .select-range-controls {
 	display: inline-block;
 	padding-right: 30px;
 	position: relative;
 }
 
-table.basic caption .select-limit-controls label {
+table.basic caption .select-range-controls label {
 	display: block;
 }
 
-table.basic caption .select-limit-controls span {
+table.basic caption .select-range-controls span {
 	cursor: pointer;
 	display: block;
 	height: 15px;
@@ -72,15 +74,15 @@ table.basic caption .select-limit-controls span {
 	width: 24px;
 }
 
-table.basic caption .select-limit-controls span.increment {
+table.basic caption .select-range-controls span.increment {
 	top: 0;
 }
 
-table.basic caption .select-limit-controls span.decrement {
+table.basic caption .select-range-controls span.decrement {
 	bottom: 0;
 }
 
-table.basic caption .select-limit-controls span.increment:before {
+table.basic caption .select-range-controls span.increment:before {
 	border-bottom: 12px solid #000;
 	border-left: 12px solid transparent;
 	border-right: 12px solid transparent;
@@ -90,7 +92,7 @@ table.basic caption .select-limit-controls span.increment:before {
 	width: 0;
 }
 
-table.basic caption .select-limit-controls span.decrement:before {
+table.basic caption .select-range-controls span.decrement:before {
 	border-top: 12px solid #000;
 	border-left: 12px solid transparent;
 	border-right: 12px solid transparent;
@@ -100,34 +102,32 @@ table.basic caption .select-limit-controls span.decrement:before {
 	width: 0;
 }
 
-.vsort, .hsort {
-	display: block;
-	height: 26px;
-	position: absolute;
+.vsort, .hsort, .on {
+	display: inline-block;
+	height: 20px;
 	text-align: center;
-	width: 26px;
-	right: 5px;
-	top: 5px;
+	position: relative;
+	width: 40px;
 }
 
-.vsort {
+.vsort, .on {
 	background-color: rgba(0,0,0,0.1);
 }
 
-.vsort b {
-	border: 12px solid transparent;
-	border-top: 12px solid #aaa;
+.vsort b, .on b {
+	border: 10px solid transparent;
+	border-top: 10px solid #aaa;
 	border-bottom-width: 0;
 	content: '';
 	cursor: pointer;
 	display: block;
 	position: absolute;
-	top: 9px;
-	left: 1px;
+	top: 6px;
+	left: 11px;
 }
 
 .vsort.asc b {
-	border: 12px solid transparent;
+	border: 10px solid transparent;
 	border-bottom-color: #aaa;
 	border-top-width: 0;
 	top: 6px;
@@ -147,28 +147,112 @@ table.basic caption .select-limit-controls span.decrement:before {
 	top: 1px;
 }
 
-.hsort.dec {
-	left: 5px;
-}
-
-.hsort.dec b {
-	border-left-width: 0;
-	border-right-color: #fff;
-	left: 9px;
-}
-.hsort.inc b {
-	border-right-width: 0;
-	border-left-color: #fff;
-	right: 6px;
-}
-
 table.basic thead td:not(:first-child) {
 	padding-right: 36px;
 	position: relative;
 	height: 40px;
 }
 
-table.basic thead  tr:first-child td:not(:first-child) {
+table.basic thead tr.multirow td {
+	height: auto;
+	line-height: 0;
+	padding: 0;
+	height: 20px;
+	text-align: center;
+}
+table.basic thead tr.multirow.c td {
+	background-color: #aaa;
+}
+table.basic thead tr.multirow.c .off {
+	cursor: pointer;
+	display: inline-block;
+}
+table.basic thead tr.multirow.c .off > b{
+	display: block;
+	height: 20px;
+	position: relative;
+	width: 20px;
+}
+table.basic thead tr.multirow.c .off > b:before {
+	transform: rotate(45deg);
+}
+table.basic thead tr.multirow.c .off > b:after {
+	transform: rotate(-45deg);
+}
+table.basic thead tr.multirow.c .off > b:before,
+table.basic thead tr.multirow.c .off > b:after {
+	background-color: #fff;
+	content: '';
+	display: block;
+	height: 20px;
+	left: 9px;
+	position: absolute;
+	width: 2px;
+}
+table.basic thead tr.multirow.c .hsort {
+	background-color: rgba(255, 255, 255, 0.4);
+	height: 20px;
+	opacity: 1;
+	position: absolute;
+	top: 0;
+	width: 34px;
+}
+table.basic thead tr.multirow.c .hsort.dec {
+	left: 0;
+}
+table.basic thead tr.multirow.c .hsort.inc {
+	right: 0;
+}
+
+table.basic thead tr.multirow.c .hsort > b {
+	border: none;
+	height: 100%;
+	left: 0;
+	position: relative;
+	top: 0;
+	width: 100%;
+}
+table.basic thead tr.multirow.c .hsort > b:before,
+table.basic thead tr.multirow.c .hsort > b:after {
+	background-color: #fff;
+	content: '';
+	display: block;
+	height: 20px;
+	position: absolute;
+	width: 2px;
+}
+table.basic thead tr.multirow.c .hsort > b:before {
+	left: 9px;
+	transform: rotate(45deg);
+}
+table.basic thead tr.multirow.c .hsort > b:after {
+	right: 9px;
+	transform: rotate(-45deg);
+}
+table.basic thead tr.multirow.c .hsort.dec > b:before {
+	left: 9px;
+	transform: rotate(-45deg);
+}
+table.basic thead tr.multirow.c .hsort.dec > b:after {
+	right: 9px;
+	transform: rotate(45deg);
+}
+
+table.basic thead tr.multirow.c .on {
+	display: none;
+}
+
+table.basic thead tr.multirow.c td[data-priority="-1"] .on {
+	display: inline-block;
+}
+
+table.basic thead tr.multirow.c td[data-priority="-1"] .hsort,
+table.basic thead tr.multirow.c td[data-priority="-1"] .off {
+	display: none;
+}
+
+
+table.basic thead  tr:not(:last-child) td:not(:first-child) {
 	padding: 0;
 	text-align: center;
 }

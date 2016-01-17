@@ -170,14 +170,14 @@ function updateSelectionLength(options) {
 	extra,
 	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]');
 
-	if (options.selected.length > options.limit) {
-		extra = options.selected.slice(options.limit - options.selected.length);
+	if (options.selected.length > options.range) {
+		extra = options.selected.slice(options.range - options.selected.length);
 		for (i = 0, l = extra.length; i < l; i += 1) {
 			options.table.querySelector(['input[value="', extra[i], '"]'].join('')).checked = false;
 		}
 	}
-	if (options.selected.length < options.limit) {
-		for (i = 0, l = options.limit; i < l; i += 1) {
+	if (options.selected.length < options.range) {
+		for (i = 0, l = options.range; i < l; i += 1) {
 			if (!boxes[i].checked) {
 				boxes[i].checked = true;
 			}
@@ -190,7 +190,7 @@ function registerSelectionChangeHandlers(options) {
 	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
 	boxes.listener = function () {
-		if (options.selected.length === options.limit) {
+		if (options.selected.length === options.range) {
 			this.checked = false;
 		}
 		onSelectionChange(boxes, options);
@@ -218,7 +218,7 @@ function registerSelectionChangeHandlers(options) {
 			l = boxes.length;
 			for (; i < l; i += 1) {
 				(function () {
-					if (!this.disabled && i < options.limit) {
+					if (!this.disabled && i < options.range) {
 						this.checked = true;
 						c += 1;
 					}
@@ -334,31 +334,31 @@ function registerMouseClickHandlers(options) {
 }
 
 function registerSelectionLimitHandlers(options) {
-	var limiter = options.table.querySelector('caption .select-limit-controls > input');
+	var limiter = options.table.querySelector('caption .select-range-controls > input');
 
-	limiter.value = options.limit;
+	limiter.value = options.range;
 
 	limiter.addEventListener('change', function (e) {
-		options.limit = parseInt(e.target.value, 10);
+		options.range = parseInt(e.target.value, 10);
 	});
 
-	options.table.querySelector('caption .select-limit-controls > .increment').addEventListener('click', function () {
+	options.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
 		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
-		options.limit += 1;
-		if (options.limit > options.data.length) {
-			return options.limit = options.data.length;
+		options.range += 1;
+		if (options.range > options.data.length) {
+			return options.range = options.data.length;
 		}
-		limiter.value = options.limit;
+		limiter.value = options.range;
 		updateSelectionLength(options);
 	});
 
-	options.table.querySelector('caption .select-limit-controls > .decrement').addEventListener('click', function () {
+	options.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
 		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
-		options.limit -= 1;
-		if (options.limit < 0) {
-			return options.limit = 0;
+		options.range -= 1;
+		if (options.range < 0) {
+			return options.range = 0;
 		}
-		limiter.value = options.limit;
+		limiter.value = options.range;
 		updateSelectionLength(options);
 	});
 }
@@ -438,7 +438,7 @@ function renderTableBody(options) {
 	for (; i < l; i += 1) {
 		html += template(options.table.querySelector('caption > textarea').value,
 			augment({
-				checked : i < options.limit ? 'checked' : ''
+				checked : i < options.range ? 'checked' : ''
 			}, options.data[i]));
 	}
 	options.table.querySelector('tbody').innerHTML = html;
@@ -449,7 +449,7 @@ function renderTable(options) {
 	options = augment({
 			table : 'table',
 			data : [],
-			limit : -1,
+			range : -1,
 			sortPattern : [],
 			selected : 0,
 			hueOffset : 30,
@@ -458,8 +458,8 @@ function renderTable(options) {
 			brightness : 100
 		}, options);
 
-	if (options.limit < 0) {
-		options.limit = options.data.length;
+	if (options.range < 0) {
+		options.range = options.data.length;
 	}
 	options.table = document.querySelector(options.table);
 

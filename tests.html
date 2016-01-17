@@ -4,9 +4,9 @@
 		<title>Multisort UX tests</title>
 		<meta charset="utf8" />
 		<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.20.0.css">
-		<link rel="stylesheet" media="all" type="text/css" href="css/multisort-ux-2.css" />
+		<link rel="stylesheet" media="all" type="text/css" href="css/multisort-ux.css" />
 		<script src="http://code.jquery.com/qunit/qunit-1.20.0.js"></script>
-		<script src="js/multisort-ux-2.js" type="text/javascript"></script>
+		<script src="js/multisort-ux.js" type="text/javascript"></script>
 		<script src="js/array-unique.js" type="text/javascript"></script>
 		<script type="text/javascript">
 		
@@ -138,7 +138,7 @@
 			
 			assert.equal(testArray[3], a, 'arrays in arrays are stored by referrence');
 			
-			// shifting up
+			// shifting down
 			x = testArray[p - 1];
 			testArray[p - 1] = testArray[p];
 			testArray[p] = x;
@@ -158,7 +158,6 @@
 			b = testArray[4];
 			p = 3;
 			
-			// pushing down
 			x = testArray[p];
 			testArray[p] = testArray[p + 1];
 			testArray[p + 1] = x;
@@ -236,7 +235,7 @@
 			runNTest(5, assert);
 		});
 		
-		QUnit.test('testing buttons, checkboxes and event handlers', function (assert) {
+		QUnit.test('testing buttons and event handlers', function (assert) {
 			
 			runNTest(2, assert, function (data, testResults) {
 								
@@ -289,8 +288,8 @@
 						<span class="selected">0</span>/<span class="total">0</span>
 					</div>
 					
-					<div class="select-limit-controls">
-						<label>Limit</label>
+					<div class="select-range-controls">
+						<label>Range</label>
 						<input value="" size="5" />
 						<span class="increment"></span>
 						<span class="decrement"></span>

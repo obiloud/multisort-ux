@@ -54,17 +54,17 @@ table.basic caption .counters {
 	padding: 10px;
 }
 
-table.basic caption .select-limit-controls {
+table.basic caption .select-range-controls {
 	display: inline-block;
 	padding-right: 30px;
 	position: relative;
 }
 
-table.basic caption .select-limit-controls label {
+table.basic caption .select-range-controls label {
 	display: block;
 }
 
-table.basic caption .select-limit-controls span {
+table.basic caption .select-range-controls span {
 	cursor: pointer;
 	display: block;
 	height: 15px;
@@ -74,15 +74,15 @@ table.basic caption .select-limit-controls span {
 	width: 24px;
 }
 
-table.basic caption .select-limit-controls span.increment {
+table.basic caption .select-range-controls span.increment {
 	top: 0;
 }
 
-table.basic caption .select-limit-controls span.decrement {
+table.basic caption .select-range-controls span.decrement {
 	bottom: 0;
 }
 
-table.basic caption .select-limit-controls span.increment:before {
+table.basic caption .select-range-controls span.increment:before {
 	border-bottom: 12px solid #000;
 	border-left: 12px solid transparent;
 	border-right: 12px solid transparent;
@@ -92,7 +92,7 @@ table.basic caption .select-limit-controls span.increment:before {
 	width: 0;
 }
 
-table.basic caption .select-limit-controls span.decrement:before {
+table.basic caption .select-range-controls span.decrement:before {
 	border-top: 12px solid #000;
 	border-left: 12px solid transparent;
 	border-right: 12px solid transparent;
