@@ -7,44 +7,8 @@
 		<link rel="stylesheet" media="all" type="text/css" href="css/multisort-ux-2.css" />
 		<script src="http://code.jquery.com/qunit/qunit-1.20.0.js"></script>
 		<script src="js/multisort-ux-2.js" type="text/javascript"></script>
+		<script src="js/array-unique.js" type="text/javascript"></script>
 		<script type="text/javascript">
-		if (typeof Array.prototype.getUnique != 'undefined') {
-			console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
-		}
-		Array.prototype.getUnique = function(){
-		   var u = {}, a = [];
-		   for(var i = 0, l = this.length; i < l; i += 1){
-			  if(u.hasOwnProperty(this[i])) {
-				 continue;
-			  }
-			  a.push(this[i]);
-			  u[this[i]] = 1;
-		   }
-		   return a;
-		}
-		Object.defineProperty(Array.prototype, "getUnique", {enumerable: false});
-		</script>
-		<script type="text/javascript">
-		
-		var factorial = (function () {
-			var f = [];
-			function factorial (n) {
-				if (n == 0 || n == 1) {
-					return 1;
-				}
-				if (f[n] > 0) {
-					return f[n];
-				}
-				return f[n] = factorial(n-1) * n;
-			}
-			return function (n) {
-				if (typeof f[n] !== 'undefined') {
-					return f[n];
-				} else {
-					return factorial(n);
-				}
-			};
-		})();
 		
 		function getMatrix(r, c) {	
 			var i = 0, l, b, m = [], p, w = 0, log = 1;
@@ -53,7 +17,7 @@
 			l = r;
 			p = Math.round(l / c);
 				
-			if (log) console.log('data matrics for ', b.length, ' column table');
+			if (log) console.log('data matrics for (', b.length, ') column table');
 			
 			for (; i < l; i += 1) {
 				if (i % p) {
@@ -61,8 +25,6 @@
 					if (w === b.length) {
 						w = 0;
 					}
-				}
-				if (i % p) {
 					b[w] -= 1;
 				} else {
 					b[w] += 1;
@@ -138,7 +100,6 @@
 			for (var i = 0, l = c.length; i < l; i += 1) {
 				buffer = buffer.concat(FindAllLetterCasePermutations(c[i]));
 			}
-			console.log('unfiltered', buffer.length, 'filtered', buffer.getUnique().length);
 			buffer = buffer.getUnique();
 			
 			(function () {
@@ -215,7 +176,6 @@
 				(function (current) {
 					if (!last)  {
 						last = current;
-						console.log(cnt)
 					} else {
 						if (tests.individualResults[last].join('') == tests.individualResults[current].join('')) {
 							console.log(last, tests.individualResults[last].join(''));
@@ -226,6 +186,8 @@
 				})(r);
 				cnt++;
 			}
+			
+			assert.ok(last);
 			
 			var unique = tests.totalResults.map(function (i) {
 				return i.join('');
