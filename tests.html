@@ -62,7 +62,12 @@
 						w = 0;
 					}
 				}
-				b[w] += 1;
+				if (i % p) {
+					b[w] -= 1;
+				} else {
+					b[w] += 1;
+				}
+				b[w] = Math.abs(b[w]);
 				if (log) console.log(b);
 				m.push(b.slice(0));
 			}
