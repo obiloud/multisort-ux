@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 function getEvent(type, init) {
-	var event;
+	var event = null;
 	try {
 		if ('click' === type) {
 			event = new MouseEvent(type);
@@ -206,12 +206,25 @@ function updateSelectionLength(options) {
 	onSelectionChange(boxes, options);
 }
 
+function getNumChecked(boxes) {
+	return (Array.prototype.map.call(boxes, function(c) {
+		return c.checked ? 1 : 0;
+	})).reduce(function (p, c) {
+			return p + c;
+	});
+}
+
 function registerSelectionChangeHandlers(options) {
 	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
 	boxes.listener = function () {
-		if (options.selected.length === options.range) {
-			this.checked = false;
+		// if (options.selected.length === options.range) {
+			// this.checked = false;
+		// }
+		if (getNumChecked(boxes) < options.range) {
+			options.table.querySelector('thead input[type="checkbox"]').checked = false;
+		} else {
+			options.table.querySelector('thead input[type="checkbox"]').checked = true;
 		}
 		onSelectionChange(boxes, options);
 	};
@@ -247,8 +260,6 @@ function registerSelectionChangeHandlers(options) {
 		}
 		onSelectionChange(boxes, options);
 	});
-
-	// onSelectionChange(boxes, options);
 }
 
 function registerMouseClickHandlers(options) {
@@ -354,11 +365,11 @@ function registerMouseClickHandlers(options) {
 }
 
 function registerSelectionLimitHandlers(options) {
-	var limiter = options.table.querySelector('caption .select-range-controls > input');
+	var rangeInput = options.table.querySelector('caption .select-range-controls > input');
 
-	limiter.value = options.range;
+	rangeInput.value = options.range;
 
-	limiter.addEventListener('change', function (e) {
+	rangeInput.addEventListener('change', function (e) {
 		options.range = parseInt(e.target.value, 10);
 	});
 
@@ -368,7 +379,7 @@ function registerSelectionLimitHandlers(options) {
 		if (options.range > options.data.length) {
 			return options.range = options.data.length;
 		}
-		limiter.value = options.range;
+		rangeInput.value = options.range;
 		updateSelectionLength(options);
 	});
 
@@ -378,7 +389,7 @@ function registerSelectionLimitHandlers(options) {
 		if (options.range < 0) {
 			return options.range = 0;
 		}
-		limiter.value = options.range;
+		rangeInput.value = options.range;
 		updateSelectionLength(options);
 	});
 }
@@ -467,7 +478,7 @@ function renderTableBody(options) {
 function renderTable(options) {
 
 	options = augment({
-			table : 'table',
+			table : 'table.basic',
 			data : [],
 			range : -1,
 			sortPattern : [],
@@ -486,7 +497,9 @@ function renderTable(options) {
 	renderTableHeader(options);
 
 	options.data.sort(sortByMultiple.apply(null, options.sortPattern));
-
+	
+	options.table.querySelector('caption .counters .total').textContent = options.data.length;
+	options.table.querySelector('caption .counters .selected').textContent = options.range;
 	options.table.addEventListener('selection', function (e) {
 		options.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
 		options.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
