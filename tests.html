@@ -86,7 +86,7 @@
 		
 		function runNTest(numColumns, assert, callback) {
 		
-			var pattern = getPattern(numColumns), data = formatData(getMatrix(pattern.expected, numColumns)), testResults = {};
+			var pattern = getPattern(numColumns), data = formatData(getDataMatrix(pattern.expected, numColumns)), testResults = {};
 			testResults.individualResults = {};
 			testResults.totalResults = [];
 			
@@ -178,7 +178,7 @@
 		});
 		
 		QUnit.test('Select All checkbox tests', function (assert) {
-			var data = formatData(getMatrix(8, 2));
+			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
 				'data' : data
@@ -225,7 +225,7 @@
 		});
 		
 		QUnit.test('select range tests', function(assert) {
-			var data = formatData(getMatrix(8, 2));
+			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
 				'data' : data
@@ -261,7 +261,7 @@
 		});
 		
 		QUnit.skip('initialize state tests', function(assert) {
-			var data = formatData(getMatrix(8, 2));
+			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
 				'data' : data
@@ -269,7 +269,7 @@
 		});
 		
 		QUnit.skip('filter column tests', function(assert) {
-			var data = formatData(getMatrix(8, 2));
+			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
 				'data' : data

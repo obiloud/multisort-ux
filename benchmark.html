@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Multisort UX benchmark</title>
+		<meta charset="utf8" />
+		<link rel="stylesheet" media="all" type="text/css" href="css/multisort-ux.css" />
+		<script src="js/lodash.js"></script>
+		<script src="js/platform.js"></script>
+		<script src="js/benchmark.js"></script>
+		<script src="js/test-suite.js" type="text/javascript"></script>
+		<script src="js/array-unique.js" type="text/javascript"></script>
+		<script src="js/multisort-ux.js" type="text/javascript"></script>
+		<script src="http://code.jquery.com/qunit/qunit-1.20.0.js"></script>
+		<script>
+		document.addEventListener("DOMContentLoaded", function (event) {
+			//var data = formatData(getDataMatrix(getPattern(2).expected, 2));
+			//document.getElementById('json').value = QUnit.dump.parse(data);
+		});
+		
+		var suite = new Benchmark.Suite;
+		
+		// add tests
+		suite.add('Increment#operator', function () {
+			i = 0;
+			i++;
+			
+		}).add('Increment#adding', function () {
+			i = 0;
+			i += 1;
+		})
+		// add listeners
+		.on('cycle', function (event) {
+			console.log(String(event.target));
+		})
+		.on('complete', function () {
+			console.log('Fastest is ' + this.filter('fastest').map('name'));
+		})
+		// run async
+		.run({
+			'async' : true
+		});
+		</script>
+	</head>
+	<body>
+		<!-- <textarea id="json"></textarea>
+		<table id="my-table" class="basic">
+			<caption>
+				<textarea>
+					<tr>
+						<td><input type="checkbox" {{checked}} value="{{id}}" /></td>
+						<td>{{a}}</td>
+						<td>{{b}}</td>
+					</tr>
+				</textarea>
+				
+				<div class="counters">
+					<span class="selected">0</span>/<span class="total">0</span>
+				</div>
+				
+				<div class="select-range-controls">
+					<label>Range</label>
+					<input value="" size="5" />
+					<span class="increment"></span>
+					<span class="decrement"></span>
+				</div>
+				
+			</caption>
+			<thead>
+				<tr>
+					<td><input type="checkbox" checked /></td>
+					<td data-col="a">A</td>
+					<td data-col="b">B</td>
+				</tr>
+			<thead>
+			<tfoot></tfoot>
+			<tbody></tbody>
+		</table> -->
+	</body>
+</html>
