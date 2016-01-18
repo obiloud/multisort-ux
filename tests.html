@@ -252,6 +252,12 @@
 			boxes[boxes.length - 1].dispatchEvent(getEvent('click'));
 			
 			assert.equal(getNumChecked(boxes), getSelected(), 'selected count is updated');
+			
+			/**TODO make assertations on:
+				input behavior,
+				increment button
+				decrement button */
+			assert.ok(0, 'TODO make assertations on: input behavior, increment and decrement range buttons');
 		});
 		
 		QUnit.skip('initialize state tests', function(assert) {
