@@ -187,22 +187,25 @@ function onSelectionChange(boxes, options) {
 function updateSelectionLength(options) {
 	var i,
 	l,
-	extra,
-	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]');
-
-	if (options.selected.length > options.range) {
-		extra = options.selected.slice(options.range - options.selected.length);
-		for (i = 0, l = extra.length; i < l; i += 1) {
-			options.table.querySelector(['input[value="', extra[i], '"]'].join('')).checked = false;
-		}
-	}
-	if (options.selected.length < options.range) {
-		for (i = 0, l = options.range; i < l; i += 1) {
-			if (!boxes[i].checked) {
-				boxes[i].checked = true;
+	allBox = options.table.querySelector('thead input[type="checkbox"]'),
+	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]'),
+	checkedCount = getNumChecked(boxes);
+	if (checkedCount > options.range) {
+		for (i = boxes.length - 1; i > -1; i -= 1) {
+			if (boxes[i].checked) {
+				boxes[i].checked = false;
+				if (getNumChecked(boxes) === options.range) {
+					break;
+				}
 			}
 		}
 	}
+	if (getNumChecked(boxes) >= options.range) {
+		allBox.checked = true;
+	} else {
+		allBox.checked = false;
+	}
+	
 	onSelectionChange(boxes, options);
 }
 
@@ -218,9 +221,6 @@ function registerSelectionChangeHandlers(options) {
 	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
 	boxes.listener = function () {
-		// if (options.selected.length === options.range) {
-			// this.checked = false;
-		// }
 		if (getNumChecked(boxes) < options.range) {
 			options.table.querySelector('thead input[type="checkbox"]').checked = false;
 		} else {
@@ -364,17 +364,17 @@ function registerMouseClickHandlers(options) {
 	});
 }
 
-function registerSelectionLimitHandlers(options) {
+function registerSelectionRangeHandlers(options) {
 	var rangeInput = options.table.querySelector('caption .select-range-controls > input');
 
 	rangeInput.value = options.range;
 
 	rangeInput.addEventListener('change', function (e) {
 		options.range = parseInt(e.target.value, 10);
+		updateSelectionLength(options);
 	});
 
 	options.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
-		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
 		options.range += 1;
 		if (options.range > options.data.length) {
 			return options.range = options.data.length;
@@ -384,7 +384,6 @@ function registerSelectionLimitHandlers(options) {
 	});
 
 	options.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
-		var box = options.table.querySelector('thead tr td:first-child > input[type="checkbox"]');
 		options.range -= 1;
 		if (options.range < 0) {
 			return options.range = 0;
@@ -507,7 +506,7 @@ function renderTable(options) {
 
 	renderTableBody(options);
 
-	registerSelectionLimitHandlers(options);
+	registerSelectionRangeHandlers(options);
 	registerMouseClickHandlers(options);
 	registerSelectionChangeHandlers(options);
 }

@@ -224,18 +224,72 @@
 			assert.equal(getNumChecked(boxes), 8, 'clicked again restored previous state, all rows checked');
 		});
 		
-		QUnit.test('select range tests', function(assert) {
+		QUnit.test('update counters tests', function(assert) {
 			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
 				'data' : data
 			});
 			
-			var allBox = document.querySelectorAll('#my-table thead input[type="checkbox"]');
+			var allBox = document.querySelector('#my-table thead input[type="checkbox"]');
 			var boxes = document.querySelectorAll('#my-table tbody input[type="checkbox"]');
 			var total = document.querySelector('#my-table caption .counters .total');
 			var selected = document.querySelector('#my-table caption .counters .selected');
 			var rangeInput = document.querySelector('#my-table .select-range-controls input');
+			var extendRange =  document.querySelector('#my-table .select-range-controls .increment');
+			var shortenRange =  document.querySelector('#my-table .select-range-controls .decrement');
+			
+			function getTotal() {
+				return parseInt(total.textContent, 10);
+			}
+			
+			function getSelected() {
+				return parseInt(selected.textContent, 10);
+			}
+			assert.ok(allBox.checked, 'initialy "all" checkbox should be checked');
+			
+			assert.equal(getTotal(), boxes.length, 'displayed total number of rows'); 
+
+			assert.equal(getSelected(), boxes.length, 'all rows selected');
+			
+			boxes[boxes.length - 1].dispatchEvent(getEvent('click'));
+			
+			assert.equal(getNumChecked(boxes), getSelected(), 'selected count is updated');
+			
+			assert.notOk(allBox.checked, 'if less then Range boxes selected "All" box should be unchecked');
+			
+			shortenRange.dispatchEvent(getEvent('click'));
+			
+			assert.equal(rangeInput.value, getTotal() - 1, 'selection range is decremented');
+			
+			assert.ok(allBox.checked, 'range is shortened and selection length matches range: "all" checkbox should be checked');
+			
+			extendRange.dispatchEvent(getEvent('click'));
+			
+			assert.equal(rangeInput.value, getTotal(), 'selection range is incremented');
+			
+			assert.equal(getSelected() + 1, getTotal(), 'one row stays unchecked');
+			
+			boxes[boxes.length - 1].dispatchEvent(getEvent('click'));
+			
+			assert.equal(getSelected(), getTotal(), 'state of boxes restored');
+			
+		});
+		
+		QUnit.test('shorten selection range tests', function(assert) {
+			var data = formatData(getDataMatrix(8, 2));
+			
+			renderTable({
+				'data' : data
+			});
+			
+			var allBox = document.querySelector('#my-table thead input[type="checkbox"]');
+			var boxes = document.querySelectorAll('#my-table tbody input[type="checkbox"]');
+			var total = document.querySelector('#my-table caption .counters .total');
+			var selected = document.querySelector('#my-table caption .counters .selected');
+			var rangeInput = document.querySelector('#my-table .select-range-controls input');
+			var extendRange =  document.querySelector('#my-table .select-range-controls .increment');
+			var shortenRange =  document.querySelector('#my-table .select-range-controls .decrement');
 			
 			function getTotal() {
 				return parseInt(total.textContent, 10);
@@ -245,19 +299,34 @@
 				return parseInt(selected.textContent, 10);
 			}
 			
-			assert.equal(getTotal(), boxes.length, 'total number of rows'); 
-
-			assert.equal(getSelected(), boxes.length, 'all rows selected');
-			
-			boxes[boxes.length - 1].dispatchEvent(getEvent('click'));
+			boxes[0].dispatchEvent(getEvent('click'));
 			
 			assert.equal(getNumChecked(boxes), getSelected(), 'selected count is updated');
 			
-			/**TODO make assertations on:
-				input behavior,
-				increment button
-				decrement button */
-			assert.ok(0, 'TODO make assertations on: input behavior, increment and decrement range buttons');
+			assert.notOk(allBox.checked, 'if less then Range boxes selected "All" box should be unchecked');
+			
+			shortenRange.dispatchEvent(getEvent('click'));
+			
+			assert.equal(rangeInput.value, getTotal() - 1, 'selection range is decremented');
+			
+			assert.ok(allBox.checked, 'range is shortened and selection length matches range: "all" checkbox should be checked');
+			
+			shortenRange.dispatchEvent(getEvent('click'));
+			
+			assert.equal(rangeInput.value, getTotal() - 2, 'selection range is decremented again');
+			
+			assert.equal(rangeInput.value, getNumChecked(boxes), 'one more row is unchecked');
+
+			assert.ok(allBox.checked, 'all box checked');
+			
+			shortenRange.dispatchEvent(getEvent('click'));
+			
+			assert.equal(rangeInput.value, getTotal() - 3, 'selection range is decremented again');
+			
+			assert.equal(rangeInput.value, getNumChecked(boxes), 'one more row is unchecked');
+
+			assert.ok(allBox.checked, 'all box checked');
+			
 		});
 		
 		QUnit.skip('initialize state tests', function(assert) {
