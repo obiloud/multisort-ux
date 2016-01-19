@@ -176,10 +176,13 @@ function onSelectionChange(boxes, options) {
 		}).call(boxes[i]);
 	}
 
+	var state = augment({}, options);
+	state.table = options.selector;
 	options.table.dispatchEvent(getEvent('selection', {
 			detail : {
-				data : options.data,
-				selected : options.selected
+				data : state.data,
+				selected : state.selected,
+				state : state
 			}
 		}));
 }
@@ -491,6 +494,7 @@ function renderTable(options) {
 	if (options.range < 0) {
 		options.range = options.data.length;
 	}
+	options.selector = options.table;
 	options.table = document.querySelector(options.table);
 
 	renderTableHeader(options);

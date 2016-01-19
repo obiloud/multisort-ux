@@ -224,7 +224,7 @@
 			assert.equal(getNumChecked(boxes), 8, 'clicked again restored previous state, all rows checked');
 		});
 		
-		QUnit.test('update counters tests', function(assert) {
+		QUnit.test('selection range tests: update counters', function(assert) {
 			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
@@ -276,7 +276,7 @@
 			
 		});
 		
-		QUnit.test('shorten selection range tests', function(assert) {
+		QUnit.test('selection range tests: shorten range', function(assert) {
 			var data = formatData(getDataMatrix(8, 2));
 			
 			renderTable({
@@ -329,12 +329,48 @@
 			
 		});
 		
-		QUnit.skip('initialize state tests', function(assert) {
-			var data = formatData(getDataMatrix(8, 2));
-			
+		var session;
+		
+		QUnit.test('initialize state tests: first column sorted ascending', function(assert) {
+			var data = formatData(getDataMatrix(8, 2)), sortbtns;
 			renderTable({
-				'data' : data
+				'data' : data,
+				'sortPattern' : [
+					['a', '>']
+				]
 			});
+			expect(5);
+			
+			sortbtns = document.querySelectorAll('.vsort');
+			assert.equal(sortbtns.length, 1, 'table is intitialized with one column sorted');
+			assert.ok(sortbtns[0].classList.contains('asc'), 'column is sorted in ascending order');
+			
+			var on = document.querySelector('td[data-priority="-1"] .on b');
+			assert.ok(on, 'second column button is visible');
+			document.querySelector('#my-table').addEventListener('selection', function (e) {
+				assert.ok(e.detail.state, 'we have state object');
+				session = e.detail.state;
+			});
+			on.dispatchEvent(getEvent('click'));
+			var d = assert.async();
+			
+			setTimeout(function () {
+				assert.equal(session.sortPattern.length, 2, 'we have state');
+				d();
+			}, 30);
+			
+		});
+		
+		QUnit.testDone(function(details) {
+			if (details.name === 'initialize state tests: first column sorted ascending') {
+				QUnit.test('initialize state tests: session stored object from previous test', function (assert) {
+					renderTable(session);
+					sortbtns = document.querySelectorAll('.vsort');
+					assert.equal(sortbtns.length, 2, 'table is intitialized with two columns sorted');
+					assert.ok(sortbtns[0].classList.contains('asc'), 'column is sorted in ascending order');
+					assert.notOk(sortbtns[1].classList.contains('asc'), 'column is sorted in descending order');
+				});
+			}
 		});
 		
 		QUnit.skip('filter column tests', function(assert) {
