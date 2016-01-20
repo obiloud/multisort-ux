@@ -57,7 +57,7 @@
 			assert.equal(testArray[4], a, 'referenced array ( a ) can be found on higher index');
 		});
 		
-		function compareResults(assert, expected, testResults) {
+		function compareResults(assert, count, testResults) {
 			var last = '', cnt = 0;
 			for (var r in testResults.individualResults) {
 				(function (current) {
@@ -76,53 +76,36 @@
 			
 			assert.ok(last, 'no duplicate results found in individual testResults');
 			
-			var unique = testResults.totalResults.map(function (i) {
+			var results = testResults.totalResults.map(function (i) {
 				return i.join('');
 			});
 			
-			assert.equal(unique.length, expected, 'all testResults passed');
-			assert.equal(unique.getUnique().length, expected, 'result length unchanged after filtering duplicates');
-		}
-		
-		function runNTest(numColumns, assert, callback) {
-		
-			var pattern = getPattern(numColumns), data = formatData(getDataMatrix(pattern.expected, numColumns)), testResults = {};
-			testResults.individualResults = {};
-			testResults.totalResults = [];
-			
-			function storeResults(test, result) {
-				testResults.individualResults[test] = result.map(function (o) {
-					return o.id;
-				});
-				testResults.totalResults.push(testResults.individualResults[test]);
-			};
-			
-			for (var test in pattern) {
-				if (test === "expected") continue;
-				storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[test])));
-			}
-			
-			if (typeof callback === 'function') {
-				callback(data, testResults);
-			} else {
-				compareResults(assert, pattern.expected, testResults);
-			}
+			assert.equal(results.length, count, 'all testResults passed');
+			assert.equal(results.getUnique().length, count, 'result length unchanged after filtering duplicates');
 		}
 		
 		QUnit.test('multi sorting: running tests on two column table', function (assert) {
-			runNTest(2, assert);
+			runNTest(2, function(data, pattern, testResults) {
+				compareResults(assert, pattern.count, testResults);
+			});
 		});
 		
 		QUnit.test('multi sorting: running tests on three column table', function (assert) {
-			runNTest(3, assert);
+			runNTest(3, function(data, pattern, testResults) {
+				compareResults(assert, pattern.count, testResults);
+			});
 		});
 		
 		QUnit.test('multi sorting: running tests on four column table', function (assert) {
-			runNTest(4, assert)
+			runNTest(4, function(data, pattern, testResults) {
+				compareResults(assert, pattern.count, testResults);
+			});
 		});
 		
 		QUnit.test('multi sorting: running tests on five column table', function (assert) {
-			runNTest(5, assert);
+			runNTest(5, function(data, pattern, testResults) {
+				compareResults(assert, pattern.count, testResults);
+			});
 		});
 		
 		QUnit.test('test facade custom events', function (assert) {
@@ -139,7 +122,7 @@
 		
 		QUnit.test('comparing results of table sorted by clicking buttons with results from previous tests', function (assert) {
 			
-			runNTest(2, assert, function (data, testResults) {
+			runNTest(2, function (data, pattern, testResults) {
 								
 				var done = assert.async(2), btn2Clicked = false;
 				

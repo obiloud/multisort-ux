@@ -1,3 +1,38 @@
+function FindAllLetterCasePermutations(s) {
+	var sp = s.split(""),
+	buffer = [];
+	for (var i = 0, l = 1 << s.length; i < l; i++) {
+		for (var j = i, k = 0; j; j >>= 1, k++) {
+			sp[k] = (j & 1) ? sp[k].toUpperCase() : sp[k].toLowerCase();
+		}
+		buffer.push(sp.join(""));
+	}
+	return buffer;
+}
+
+function FindAllPermutations(str, index, buffer) {
+	if (typeof str == "string")
+		str = str.split("");
+	if (typeof index == "undefined")
+		index = 0;
+	if (typeof buffer == "undefined")
+		buffer = [];
+	if (index >= str.length)
+		return buffer;
+	for (var i = index; i < str.length; i++)
+		buffer.push(ToggleLetters(str, index, i));
+	return FindAllPermutations(str, index + 1, buffer);
+}
+
+function ToggleLetters(str, index1, index2) {
+	if (index1 != index2) {
+		var temp = str[index1];
+		str[index1] = str[index2];
+		str[index2] = temp;
+	}
+	return str.join("");
+}
+
 function getDataMatrix(r, c) {
 	var i = 0,
 	l,
@@ -57,41 +92,6 @@ function formatData(d) {
 	return data;
 }
 
-function FindAllLetterCasePermutations(s) {
-	var sp = s.split(""),
-	buffer = [];
-	for (var i = 0, l = 1 << s.length; i < l; i++) {
-		for (var j = i, k = 0; j; j >>= 1, k++) {
-			sp[k] = (j & 1) ? sp[k].toUpperCase() : sp[k].toLowerCase();
-		}
-		buffer.push(sp.join(""));
-	}
-	return buffer;
-}
-
-function FindAllPermutations(str, index, buffer) {
-	if (typeof str == "string")
-		str = str.split("");
-	if (typeof index == "undefined")
-		index = 0;
-	if (typeof buffer == "undefined")
-		buffer = [];
-	if (index >= str.length)
-		return buffer;
-	for (var i = index; i < str.length; i++)
-		buffer.push(ToggleLetters(str, index, i));
-	return FindAllPermutations(str, index + 1, buffer);
-}
-
-function ToggleLetters(str, index1, index2) {
-	if (index1 != index2) {
-		var temp = str[index1];
-		str[index1] = str[index2];
-		str[index2] = temp;
-	}
-	return str.join("");
-}
-
 function getPattern(l, print) {
 	var c,
 	buffer = [],
@@ -117,6 +117,32 @@ function getPattern(l, print) {
 			pattern[s].push([r[i].toLowerCase(), r[i] === r[i].toLowerCase() ? '<' : '>']);
 		}
 	});
-	pattern.expected = buffer.length;
+	pattern.count = buffer.length;
 	return pattern;
+}
+
+function runNTest(numColumns, callback) {
+
+	var pattern = getPattern(numColumns),
+	data = formatData(getDataMatrix(pattern.count, numColumns)),
+	testResults = {};
+	testResults.individualResults = {};
+	testResults.totalResults = [];
+
+	function storeResults(test, result) {
+		testResults.individualResults[test] = result.map(function (o) {
+				return o.id;
+			});
+		testResults.totalResults.push(testResults.individualResults[test]);
+	};
+
+	for (var test in pattern) {
+		if (test === "count")
+			continue;
+		storeResults(test, data.slice(0).sort(sortByMultiple.apply(null, pattern[test])));
+	}
+
+	if (typeof callback === 'function') {
+		callback(data, pattern, testResults);
+	}
 }
