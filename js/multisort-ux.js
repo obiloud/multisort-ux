@@ -266,15 +266,16 @@ function registerSelectionChangeHandlers(options) {
 }
 
 function registerMouseClickHandlers(options) {
-	var vsort = options.table.querySelectorAll('.vsort > b'),
-	hsort = options.table.querySelectorAll('.hsort > b'),
-	off = options.table.querySelectorAll('.off > b'),
-	on = options.table.querySelectorAll('.on > b');
+	var vsort = options.table.querySelectorAll('.xsort-v > b'),
+	hsort = options.table.querySelectorAll('.xsort-h > b'),
+	off = options.table.querySelectorAll('.xsort-off > b'),
+	on = options.table.querySelectorAll('.xsort-on > b');
 	
 	var update = function (options) {
 		options.data.sort(sortByMultiple.apply(null, options.sortPattern));
 		renderTableHeader(options);
 		renderTableBody(options);
+		options.table.dispatchEvent(getEvent('sort', {detail:'sorted'}));
 		registerSelectionChangeHandlers(options);
 		registerMouseClickHandlers(options);
 		updateSelectionLength(options);
@@ -401,14 +402,14 @@ function renderTableHeader(options) {
 	cols = options.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
 	letters = getLetters(),
 	html = '',
-	crow = '<tr class="c multirow"><td></td>',
+	crow = '<tr class="priority ctrl"><td></td>',
 	c = [],
 	i = 0, 
 	l = options.sortPattern.length, 
 	n = 0, 
 	z = cols.length;	
 	
-	Array.prototype.map.call(th.querySelectorAll('.multirow'), function (o) {
+	Array.prototype.map.call(th.querySelectorAll('.priority'), function (o) {
 		return th.removeChild(o);
 	});
 	
@@ -428,16 +429,16 @@ function renderTableHeader(options) {
 			'"data-priority=',
 			c.indexOf(cols[n].getAttribute('data-col')),
 			'>', 
-			'<div class="hsort dec"><b></b></div>',
-			'<div class="on"><b></b></div>', 
-			'<div class="off"><b></b></div>',
-			'<div class="hsort inc"><b></b></div>',
+			'<div class="xsort-h dec"><b></b></div>',
+			'<div class="xsort-on"><b></b></div>', 
+			'<div class="xsort-off"><b></b></div>',
+			'<div class="xsort-h inc"><b></b></div>',
 			'</td>'
 		].join('');
 	}
 	
 	for (i = 0; i < l; i += 1) {
-		html += '<tr class="multirow">';
+		html += '<tr class="priority">';
 		html += ['<td style="background-color:rgb(', options.colors[i], ')">', letters[i], '</td>'].join('');
 		
 		for (n = 0; n < z; n += 1) {
@@ -445,7 +446,7 @@ function renderTableHeader(options) {
 				html += [
 					'<td data-col="', 
 					options.sortPattern[i][0], 
-					'"><div class="vsort',
+					'"><div class="xsort-v',
 					(options.sortPattern[i][1] !== '<' ? ' asc' : ''),
 					'"><b style="border-',
 					(options.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
@@ -480,7 +481,7 @@ function renderTableBody(options) {
 function renderTable(options) {
 
 	options = augment({
-			table : 'table.basic',
+			table : 'table.xsort',
 			data : [],
 			range : -1,
 			sortPattern : [],
@@ -513,4 +514,6 @@ function renderTable(options) {
 	registerSelectionRangeHandlers(options);
 	registerMouseClickHandlers(options);
 	registerSelectionChangeHandlers(options);
+	
+	options.table.dispatchEvent(getEvent('render', {detail:'rendered'}));
 }

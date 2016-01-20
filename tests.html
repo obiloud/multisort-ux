@@ -120,13 +120,47 @@
 			t.dispatchEvent(e);
 		});
 		
+		QUnit.test('test table events: render, sort, selection', function (assert) {
+			var data = formatData(getDataMatrix(8, 2)), 
+			table = document.getElementById('my-table');
+			expect(5);
+			var d = [];
+			for (var i = 0; i < 5; i += 1) {
+				d.push(assert.async());
+			}
+			
+			table.addEventListener('render', function (e) {
+				assert.ok(e.detail, 'render');
+				(d.shift())();
+			});
+			table.addEventListener('sort', function (e) {
+				assert.ok(e.detail, 'sort');
+				(d.shift())();
+			});
+			table.addEventListener('selection', function (e) {
+				assert.ok(e.detail, 'selection');
+				(d.shift())();
+			});
+			
+			
+			renderTable({
+				'data' : data
+			});
+			
+			document.querySelector('[data-priority="-1"] .xsort-on b').dispatchEvent(getEvent('click'));
+			
+			setTimeout(function () {
+				document.querySelector('[data-priority="-1"] .xsort-on b').dispatchEvent(getEvent('click'));
+			}, 10);
+		});
+		
 		QUnit.test('comparing results of table sorted by clicking buttons with results from previous tests', function (assert) {
 			
 			runNTest(2, function (data, pattern, testResults) {
 								
 				var done = assert.async(2), btn2Clicked = false;
 				
-				document.querySelector('#my-table').addEventListener('selection', (function (results) {
+				document.getElementById('my-table').addEventListener('selection', (function (results) {
 					return function (e) {
 						if (btn2Clicked) {
 							assert.equal(results.ab.join(''), e.detail.selected.join(''), 'both buttons clicked: sort case ab');
@@ -141,7 +175,7 @@
 					'data' : data
 				});
 				
-				var onbtns = document.querySelectorAll('.on b');
+				var onbtns = document.querySelectorAll('.xsort-on b');
 				assert.equal(onbtns.length, 2, 'table is rendered and we have buttons');
 				onbtns[0].dispatchEvent(getEvent('click'));
 				setTimeout(function () {
@@ -150,12 +184,12 @@
 				}, 10);
 			});
 			
-			var ctrlcells = document.querySelectorAll('#my-table thead tr.c td:not(:first-child)');
+			var ctrlcells = document.querySelectorAll('#my-table thead tr.ctrl td:not(:first-child)');
 			assert.equal(ctrlcells.length, 2, 'controll cells rendered for each column');
 			
 			var children = ctrlcells[0].childNodes;
-			assert.equal(children.length, 4, '.on .off .inc .dec controls');
-			for (var i = children.length - 1, classNames = 'dec on off inc'.split(' '); i > -1; --i) {
+			assert.equal(children.length, 4, '.xsort-on .xsort-off .inc .dec controls');
+			for (var i = children.length - 1, classNames = 'dec xsort-on xsort-off inc'.split(' '); i > -1; --i) {
 				assert.ok(children[i].classList.contains(classNames[i]), ['controll (', classNames[i], ') in right position'].join(''));
 			}
 		});
@@ -314,6 +348,18 @@
 		
 		var session;
 		
+		QUnit.testDone(function(details) {
+			if (details.name === 'initialize state tests: first column sorted ascending') {
+				QUnit.test('initialize state tests: session stored object from previous test', function (assert) {
+					renderTable(session);
+					sortbtns = document.querySelectorAll('.xsort-v');
+					assert.equal(sortbtns.length, 2, 'table is intitialized with two columns sorted');
+					assert.ok(sortbtns[0].classList.contains('asc'), 'column is sorted in ascending order');
+					assert.notOk(sortbtns[1].classList.contains('asc'), 'column is sorted in descending order');
+				});
+			}
+		});
+		
 		QUnit.test('initialize state tests: first column sorted ascending', function(assert) {
 			var data = formatData(getDataMatrix(8, 2)), sortbtns;
 			renderTable({
@@ -324,11 +370,11 @@
 			});
 			expect(5);
 			
-			sortbtns = document.querySelectorAll('.vsort');
+			sortbtns = document.querySelectorAll('.xsort-v');
 			assert.equal(sortbtns.length, 1, 'table is intitialized with one column sorted');
 			assert.ok(sortbtns[0].classList.contains('asc'), 'column is sorted in ascending order');
 			
-			var on = document.querySelector('td[data-priority="-1"] .on b');
+			var on = document.querySelector('td[data-priority="-1"] .xsort-on b');
 			assert.ok(on, 'second column button is visible');
 			document.querySelector('#my-table').addEventListener('selection', function (e) {
 				assert.ok(e.detail.state, 'we have state object');
@@ -344,18 +390,6 @@
 			
 		});
 		
-		QUnit.testDone(function(details) {
-			if (details.name === 'initialize state tests: first column sorted ascending') {
-				QUnit.test('initialize state tests: session stored object from previous test', function (assert) {
-					renderTable(session);
-					sortbtns = document.querySelectorAll('.vsort');
-					assert.equal(sortbtns.length, 2, 'table is intitialized with two columns sorted');
-					assert.ok(sortbtns[0].classList.contains('asc'), 'column is sorted in ascending order');
-					assert.notOk(sortbtns[1].classList.contains('asc'), 'column is sorted in descending order');
-				});
-			}
-		});
-		
 		QUnit.skip('filter column tests', function(assert) {
 			var data = formatData(getDataMatrix(8, 2));
 			
@@ -364,7 +398,6 @@
 			});
 		});
 		
-		
 		</script>
 	</head>
 	<body>
@@ -372,7 +405,7 @@
 		<div id="qunit"></div>
 
 		<div id="qunit-fixture">
-			<table id="my-table" class="basic">
+			<table id="my-table" class="xsort">
 				<caption>
 					<textarea>
 						<tr>

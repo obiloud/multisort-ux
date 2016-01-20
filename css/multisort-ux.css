@@ -2,50 +2,50 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
  
-table.basic {
+table.xsort {
 	font-family: sans-serif;
 	width: 100%;
 }
-table.basic td {
+table.xsort td {
 	background-color: #efefef;
 	padding: 5px;
 }
 
-table.basic thead td {
+table.xsort thead td {
 	background-color: #aaa;
 	color: #fff;
 }
 
-table.basic thead tr:not(:last-child) td {
+table.xsort thead tr:not(:last-child) td {
 	background-color: #333;
 }
 
-table.basic tr.selected td {
+table.xsort tr.selected td {
 	background-color: #eee;
 }
 
-table.basic tr.done td {
+table.xsort tr.done td {
 	background-color: #bbb;
 	color: #fff;
 }
-table.basic tr td:first-child {
+table.xsort tr td:first-child {
 	width: 40px;
 }
-table.basic tr td:first-child > input[type="checkbox"] {
+table.xsort tr td:first-child > input[type="checkbox"] {
 	cursor: pointer;
 	width: 32px;
 	height: 32px;
 }
 
-table.basic caption {
+table.xsort caption {
 	text-align: left;
 }
 
-table.basic caption > textarea {
+table.xsort caption > textarea {
 	display: none;
 }
 
-table.basic caption .counters {
+table.xsort caption .counters {
 	background-color: #000;
 	border: 1px solid #fff;
 	color: #eee;
@@ -54,17 +54,17 @@ table.basic caption .counters {
 	padding: 10px;
 }
 
-table.basic caption .select-range-controls {
+table.xsort caption .select-range-controls {
 	display: inline-block;
 	padding-right: 30px;
 	position: relative;
 }
 
-table.basic caption .select-range-controls label {
+table.xsort caption .select-range-controls label {
 	display: block;
 }
 
-table.basic caption .select-range-controls span {
+table.xsort caption .select-range-controls span {
 	cursor: pointer;
 	display: block;
 	height: 15px;
@@ -74,15 +74,15 @@ table.basic caption .select-range-controls span {
 	width: 24px;
 }
 
-table.basic caption .select-range-controls span.increment {
+table.xsort caption .select-range-controls span.increment {
 	top: 0;
 }
 
-table.basic caption .select-range-controls span.decrement {
+table.xsort caption .select-range-controls span.decrement {
 	bottom: 0;
 }
 
-table.basic caption .select-range-controls span.increment:before {
+table.xsort caption .select-range-controls span.increment:before {
 	border-bottom: 12px solid #000;
 	border-left: 12px solid transparent;
 	border-right: 12px solid transparent;
@@ -92,7 +92,7 @@ table.basic caption .select-range-controls span.increment:before {
 	width: 0;
 }
 
-table.basic caption .select-range-controls span.decrement:before {
+table.xsort caption .select-range-controls span.decrement:before {
 	border-top: 12px solid #000;
 	border-left: 12px solid transparent;
 	border-right: 12px solid transparent;
@@ -102,7 +102,7 @@ table.basic caption .select-range-controls span.decrement:before {
 	width: 0;
 }
 
-.vsort, .hsort, .on {
+.xsort-v, .xsort-h, .xsort-on {
 	display: inline-block;
 	height: 20px;
 	text-align: center;
@@ -110,11 +110,11 @@ table.basic caption .select-range-controls span.decrement:before {
 	width: 40px;
 }
 
-.vsort, .on {
+.xsort-v, .xsort-on {
 	background-color: rgba(0,0,0,0.1);
 }
 
-.vsort b, .on b {
+.xsort-v b, .xsort-on b {
 	border: 10px solid transparent;
 	border-top: 10px solid #aaa;
 	border-bottom-width: 0;
@@ -126,19 +126,19 @@ table.basic caption .select-range-controls span.decrement:before {
 	left: 11px;
 }
 
-.vsort.asc b {
+.xsort-v.asc b {
 	border: 10px solid transparent;
 	border-bottom-color: #aaa;
 	border-top-width: 0;
 	top: 6px;
 }
 
-.hsort {
+.xsort-h {
 	background-color: rgba(255,255,255,0.5);
 	opacity: 0;
 }
 
-.hsort b {
+.xsort-h b {
 	border: 12px solid transparent;
 	content: '';
 	cursor: pointer;
@@ -147,40 +147,40 @@ table.basic caption .select-range-controls span.decrement:before {
 	top: 1px;
 }
 
-table.basic thead td:not(:first-child) {
+table.xsort thead td:not(:first-child) {
 	padding-right: 36px;
 	position: relative;
 	height: 40px;
 }
 
-table.basic thead tr.multirow td {
+table.xsort thead tr.priority td {
 	height: auto;
 	line-height: 0;
 	padding: 0;
 	height: 20px;
 	text-align: center;
 }
-table.basic thead tr.multirow.c td {
+table.xsort thead tr.priority.ctrl td {
 	background-color: #aaa;
 }
-table.basic thead tr.multirow.c .off {
+table.xsort thead tr.priority.ctrl .xsort-off {
 	cursor: pointer;
 	display: inline-block;
 }
-table.basic thead tr.multirow.c .off > b{
+table.xsort thead tr.priority.ctrl .xsort-off > b{
 	display: block;
 	height: 20px;
 	position: relative;
 	width: 20px;
 }
-table.basic thead tr.multirow.c .off > b:before {
+table.xsort thead tr.priority.ctrl .xsort-off > b:before {
 	transform: rotate(45deg);
 }
-table.basic thead tr.multirow.c .off > b:after {
+table.xsort thead tr.priority.ctrl .xsort-off > b:after {
 	transform: rotate(-45deg);
 }
-table.basic thead tr.multirow.c .off > b:before,
-table.basic thead tr.multirow.c .off > b:after {
+table.xsort thead tr.priority.ctrl .xsort-off > b:before,
+table.xsort thead tr.priority.ctrl .xsort-off > b:after {
 	background-color: #fff;
 	content: '';
 	display: block;
@@ -189,7 +189,7 @@ table.basic thead tr.multirow.c .off > b:after {
 	position: absolute;
 	width: 2px;
 }
-table.basic thead tr.multirow.c .hsort {
+table.xsort thead tr.priority.ctrl .xsort-h {
 	background-color: rgba(255, 255, 255, 0.4);
 	height: 20px;
 	opacity: 1;
@@ -197,16 +197,16 @@ table.basic thead tr.multirow.c .hsort {
 	top: 0;
 	width: 34px;
 }
-table.basic thead tr.multirow.c .hsort.dec {
+table.xsort thead tr.priority.ctrl .xsort-h.dec {
 	margin-left: -50px;
 	left: 50%;
 }
-table.basic thead tr.multirow.c .hsort.inc {
+table.xsort thead tr.priority.ctrl .xsort-h.inc {
 	margin-right: -50px;
 	right: 50%;
 }
 
-table.basic thead tr.multirow.c .hsort > b {
+table.xsort thead tr.priority.ctrl .xsort-h > b {
 	border: none;
 	height: 100%;
 	left: 0;
@@ -214,8 +214,8 @@ table.basic thead tr.multirow.c .hsort > b {
 	top: 0;
 	width: 100%;
 }
-table.basic thead tr.multirow.c .hsort > b:before,
-table.basic thead tr.multirow.c .hsort > b:after {
+table.xsort thead tr.priority.ctrl .xsort-h > b:before,
+table.xsort thead tr.priority.ctrl .xsort-h > b:after {
 	background-color: #fff;
 	content: '';
 	display: block;
@@ -223,64 +223,64 @@ table.basic thead tr.multirow.c .hsort > b:after {
 	position: absolute;
 	width: 2px;
 }
-table.basic thead tr.multirow.c .hsort > b:before {
+table.xsort thead tr.priority.ctrl .xsort-h > b:before {
 	left: 9px;
 	transform: rotate(45deg);
 }
-table.basic thead tr.multirow.c .hsort > b:after {
+table.xsort thead tr.priority.ctrl .xsort-h > b:after {
 	right: 9px;
 	transform: rotate(-45deg);
 }
-table.basic thead tr.multirow.c .hsort.dec > b:before {
+table.xsort thead tr.priority.ctrl .xsort-h.dec > b:before {
 	left: 9px;
 	transform: rotate(-45deg);
 }
-table.basic thead tr.multirow.c .hsort.dec > b:after {
+table.xsort thead tr.priority.ctrl .xsort-h.dec > b:after {
 	right: 9px;
 	transform: rotate(45deg);
 }
 
-table.basic thead tr.multirow.c .on {
+table.xsort thead tr.priority.ctrl .xsort-on {
 	display: none;
 }
 
-table.basic thead tr.multirow.c td[data-priority="-1"] .on {
+table.xsort thead tr.priority.ctrl td[data-priority="-1"] .xsort-on {
 	display: inline-block;
 }
 
-table.basic thead tr.multirow.c td[data-priority="-1"] .hsort,
-table.basic thead tr.multirow.c td[data-priority="-1"] .off {
+table.xsort thead tr.priority.ctrl td[data-priority="-1"] .xsort-h,
+table.xsort thead tr.priority.ctrl td[data-priority="-1"] .xsort-off {
 	display: none;
 }
 
 
-table.basic thead  tr:not(:last-child) td:not(:first-child) {
+table.xsort thead  tr:not(:last-child) td:not(:first-child) {
 	padding: 0;
 	text-align: center;
 }
 
-table.basic thead  tr:first-child td:not(:first-child) p {
+table.xsort thead  tr:first-child td:not(:first-child) p {
 	padding: 0;
 	margin: 0;
 	height: 26px;
 	margin: 5px;
 }
 
-table.basic thead tr:first-child td p {
+table.xsort thead tr:first-child td p {
 	cursor: default;
 	font-weight: bold;
 }
 
-table.basic thead tr:first-child td.occ.first .hsort.dec,
-table.basic thead tr:first-child td.occ.last .hsort.inc {
+table.xsort thead tr:first-child td.occ.first .xsort-h.dec,
+table.xsort thead tr:first-child td.occ.last .xsort-h.inc {
 	display: none;
 }
 
-table.basic thead tr:first-child td.occ:hover .hsort {
+table.xsort thead tr:first-child td.occ:hover .xsort-h {
 	opacity: 1;
 }
 
-table.basic thead tr:first-child td i {
+table.xsort thead tr:first-child td i {
 	color: #777;
 	display: block;
 	font-weight: normal;
