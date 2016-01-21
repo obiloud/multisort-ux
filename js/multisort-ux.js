@@ -492,7 +492,7 @@ function renderTable(options) {
 			brightness : 100
 		}, options);
 
-	if (options.range < 0) {
+	if (options.range < 0 || options.range > options.data.length) {
 		options.range = options.data.length;
 	}
 	options.selector = options.table;
