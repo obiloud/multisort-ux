@@ -346,6 +346,56 @@
 			
 		});
 		
+		QUnit.test('selection range tests: extend range', function(assert) {
+			var data = formatData(getDataMatrix(8, 2));
+			
+			renderTable({
+				'range' : 4,
+ 				'data' : data
+			});
+			
+			var allBox = document.querySelector('#my-table thead input[type="checkbox"]');
+			var boxes = document.querySelectorAll('#my-table tbody input[type="checkbox"]');
+			var total = document.querySelector('#my-table caption .counters .total');
+			var selected = document.querySelector('#my-table caption .counters .selected');
+			var rangeInput = document.querySelector('#my-table .select-range-controls input');
+			var extendRange =  document.querySelector('#my-table .select-range-controls .increment');
+			var shortenRange =  document.querySelector('#my-table .select-range-controls .decrement');
+			
+			function getTotal() {
+				return parseInt(total.textContent, 10);
+			}
+			
+			function getSelected() {
+				return parseInt(selected.textContent, 10);
+			}
+			
+			assert.equal(getSelected(), 4, 'table initialized with range of four, four rows selected');
+			
+			rangeInput.value = 6;
+			
+			rangeInput.dispatchEvent(getEvent('change'));
+			
+			assert.notOk(allBox.checked, 'range extended, "all" box unchecked');
+			
+			allBox.dispatchEvent(getEvent('click'));
+			
+			assert.equal(getSelected(), 6, '"all" box checked selects rows within range');
+			
+			allBox.dispatchEvent(getEvent('click'));
+			
+			assert.equal(getSelected(), 0, '"all" box unchecks all rows');
+			
+			extendRange.dispatchEvent(getEvent('click'));
+			
+			assert.equal(rangeInput.value, 7, 'increment button extends range and updates input field value');
+			
+			allBox.dispatchEvent(getEvent('click'));
+			
+			assert.equal(getSelected(), 7, '"all" box checked selects rows within range');
+			
+		});
+		
 		var session;
 		
 		QUnit.testDone(function(details) {
