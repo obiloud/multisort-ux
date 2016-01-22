@@ -265,21 +265,21 @@ function registerSelectionChangeHandlers(options) {
 	});
 }
 
+function sortTable(options) {
+	options.data.sort(sortByMultiple.apply(null, options.sortPattern));
+	renderTableHeader(options);
+	renderTableBody(options);
+	options.table.dispatchEvent(getEvent('sort', {detail:'sorted'}));
+	registerSelectionChangeHandlers(options);
+	registerMouseClickHandlers(options);
+	updateSelectionLength(options);
+}
+
 function registerMouseClickHandlers(options) {
 	var vsort = options.table.querySelectorAll('.xsort-v > b'),
 	hsort = options.table.querySelectorAll('.xsort-h > b'),
 	off = options.table.querySelectorAll('.xsort-off > b'),
 	on = options.table.querySelectorAll('.xsort-on > b');
-	
-	var update = function (options) {
-		options.data.sort(sortByMultiple.apply(null, options.sortPattern));
-		renderTableHeader(options);
-		renderTableBody(options);
-		options.table.dispatchEvent(getEvent('sort', {detail:'sorted'}));
-		registerSelectionChangeHandlers(options);
-		registerMouseClickHandlers(options);
-		updateSelectionLength(options);
-	};
 	
 	vsort.listener = function (e) {
 		e.stopPropagation();
@@ -297,7 +297,7 @@ function registerMouseClickHandlers(options) {
 				}
 				return o;
 			});
-		update(options);
+		sortTable(options);
 	};
 	Array.prototype.map.call(vsort, function (o) {
 		if (!o.listener || o.listener !== vsort.listener) {
@@ -315,12 +315,12 @@ function registerMouseClickHandlers(options) {
 				a = options.sortPattern[priority - 1];
 				options.sortPattern[priority - 1] = options.sortPattern[priority];
 				options.sortPattern[priority] = a;
-				update(options);
+				sortTable(options);
 			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sortPattern.length - 1) {
 				a = options.sortPattern[priority];
 				options.sortPattern[priority] = options.sortPattern[priority + 1];
 				options.sortPattern[priority + 1] = a;
-				update(options);
+				sortTable(options);
 			}
 		}
 	};
@@ -336,7 +336,7 @@ function registerMouseClickHandlers(options) {
 		p = parseInt(col.getAttribute('data-priority'));
 		if (p > -1) {				
 			options.sortPattern.splice(p, 1);
-			update(options);
+			sortTable(options);
 		}
 	};
 	Array.prototype.map.call(off, function (o){
@@ -357,7 +357,7 @@ function registerMouseClickHandlers(options) {
 		p = c.indexOf(col.getAttribute('data-col'));
 		if (p < 0) {
 			options.sortPattern.push([col.getAttribute('data-col'), '<']);
-			update(options);
+			sortTable(options);
 		}
 	};
 	Array.prototype.map.call(on, function (o) {
