@@ -501,7 +501,6 @@ function renderTable(options) {
 	config.selector = config.table;
 	config.table = document.querySelector(config.table);
 
-	renderTableHeader();
 
 	config.data.sort(sortByMultiple.apply(null, config.sortPattern));
 
@@ -512,6 +511,7 @@ function renderTable(options) {
 		config.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
 	});
 
+	renderTableHeader();
 	renderTableBody();
 
 	registerSelectionRangeHandlers();
