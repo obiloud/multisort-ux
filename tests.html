@@ -158,16 +158,20 @@
 			
 			runNTest(2, function (data, pattern, testResults) {
 								
-				var done = assert.async(2), btn2Clicked = false;
+				var done = assert.async(), btn2Clicked = false;
 				
 				document.getElementById('my-table').addEventListener('selection', (function (results) {
 					return function (e) {
 						if (btn2Clicked) {
 							assert.equal(results.ab.join(''), e.detail.selected.join(''), 'both buttons clicked: sort case ab');
+							done();
 						} else {
-							assert.ok(e.detail, 'CustomEvent supported');
+							assert.ok(e.detail, 'first button clicked');
+							setTimeout(function () {
+								btn2Clicked = true;
+								onbtns[1].dispatchEvent(getEvent('click'));
+							}, 1);
 						}
-						done();
 					};
 				})(testResults.individualResults));
 				
@@ -175,23 +179,20 @@
 					'data' : data
 				});
 				
-				var onbtns = document.querySelectorAll('.xsort-on b');
+				var onbtns = document.querySelectorAll('[data-priority="-1"] .xsort-on b');
 				assert.equal(onbtns.length, 2, 'table is rendered and we have buttons');
+				
+				var ctrlcells = document.querySelectorAll('#my-table thead tr.ctrl td:not(:first-child)');
+				assert.equal(ctrlcells.length, 2, 'controll cells rendered for each column');
+				
+				var children = ctrlcells[0].childNodes;
+				assert.equal(children.length, 4, '.xsort-on .xsort-off .inc .dec controls');
+				for (var i = children.length - 1, classNames = 'dec xsort-on xsort-off inc'.split(' '); i > -1; --i) {
+					assert.ok(children[i].classList.contains(classNames[i]), ['controll (', classNames[i], ') in right position'].join(''));
+				}
 				onbtns[0].dispatchEvent(getEvent('click'));
-				setTimeout(function () {
-					btn2Clicked = true;
-					onbtns[1].dispatchEvent(getEvent('click'));
-				}, 10);
 			});
 			
-			var ctrlcells = document.querySelectorAll('#my-table thead tr.ctrl td:not(:first-child)');
-			assert.equal(ctrlcells.length, 2, 'controll cells rendered for each column');
-			
-			var children = ctrlcells[0].childNodes;
-			assert.equal(children.length, 4, '.xsort-on .xsort-off .inc .dec controls');
-			for (var i = children.length - 1, classNames = 'dec xsort-on xsort-off inc'.split(' '); i > -1; --i) {
-				assert.ok(children[i].classList.contains(classNames[i]), ['controll (', classNames[i], ') in right position'].join(''));
-			}
 		});
 		
 		QUnit.test('Select All checkbox tests', function (assert) {
@@ -397,7 +398,7 @@
 		});
 		
 		var session;
-		
+		/*
 		QUnit.testDone(function(details) {
 			if (details.name === 'initialize state tests: first column sorted ascending') {
 				QUnit.test('initialize state tests: session stored object from previous test', function (assert) {
@@ -409,7 +410,7 @@
 				});
 			}
 		});
-		
+		*/
 		QUnit.test('initialize state tests: first column sorted ascending', function(assert) {
 			var data = formatData(getDataMatrix(8, 2)), sortbtns;
 			renderTable({

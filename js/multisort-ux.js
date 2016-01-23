@@ -5,27 +5,31 @@
 function getEvent(type, init) {
 	var event = null;
 	try {
-		if ('click' === type) {
-			event = new MouseEvent(type);
-		} else {
+		if (init) {
 			event = new CustomEvent(type, init);
+		} else {
+			event = new MouseEvent(type);
 		}
 	} catch (e) {
-		if ('click' === type) {
-			event = document.createEvent('MouseEvent');
-			event.initEvent(type, 0, 0);
-		} else {
+		if (init && init.detail) {
 			event = document.createEvent('CustomEvent');
 			event.initCustomEvent(type, false, false, init.detail);
+		} else {
+			event = document.createEvent('MouseEvent');
+			event.initEvent(type, 0, 0);
 		}
 	}
 	return event;
 }
- 
+
 function augment(target, source) {
 	for (var i in source) {
 		if (source.hasOwnProperty(i)) {
-			target[i] = source[i];
+			if (typeof source[i] === 'object') {
+				target[i] = JSON.parse(JSON.stringify(source[i]));
+			} else {
+				target[i] = source[i];
+			}
 		}
 	}
 	return target;
@@ -122,17 +126,17 @@ function hsvToRgb(h, s, v) {
 	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-function getColors(length, options) {
+function getColors(length) {
 	var colors = [],
-	start = options.hueOffset,
-	step = Math.round(options.maxHueShift / length),
+	start = config.hueOffset,
+	step = Math.round(config.maxHueShift / length),
 	i = 0,
 	z,
 	max,
 	sum;
 
 	for (; i < length; i += 1) {
-		colors.push(hsvToRgb(start + (i * step), options.saturation, options.brightness).join(','));
+		colors.push(hsvToRgb(start + (i * step), config.saturation, config.brightness).join(','));
 	}
 	return colors;
 }
@@ -166,19 +170,19 @@ function template(html, data) {
 	});
 }
 
-function onSelectionChange(boxes, options) {
-	options.selected = [];
+function onSelectionChange(boxes) {
+	config.selected = [];
 	for (var i = 0, l = boxes.length; i < l; i += 1) {
 		(function () {
 			if (this.checked) {
-				options.selected.push(this.value);
+				config.selected.push(this.value);
 			}
 		}).call(boxes[i]);
 	}
 
-	var state = augment({}, options);
-	state.table = options.selector;
-	options.table.dispatchEvent(getEvent('selection', {
+	var state = augment({}, config);
+	state.table = config.selector;
+	config.table.dispatchEvent(getEvent('selection', {
 			detail : {
 				data : state.data,
 				selected : state.selected,
@@ -187,59 +191,58 @@ function onSelectionChange(boxes, options) {
 		}));
 }
 
-function updateSelectionLength(options) {
+function updateSelectionLength() {
 	var i,
 	l,
-	allBox = options.table.querySelector('thead input[type="checkbox"]'),
-	boxes = options.table.querySelectorAll('tbody input[type="checkbox"]'),
+	allBox = config.table.querySelector('thead input[type="checkbox"]'),
+	boxes = config.table.querySelectorAll('tbody input[type="checkbox"]'),
 	checkedCount = getNumChecked(boxes);
-	if (checkedCount > options.range) {
+	if (checkedCount > config.range) {
 		for (i = boxes.length - 1; i > -1; i -= 1) {
 			if (boxes[i].checked) {
 				boxes[i].checked = false;
-				if (getNumChecked(boxes) === options.range) {
+				if (getNumChecked(boxes) === config.range) {
 					break;
 				}
 			}
 		}
 	}
-	if (getNumChecked(boxes) >= options.range) {
+	if (getNumChecked(boxes) >= config.range) {
 		allBox.checked = true;
 	} else {
 		allBox.checked = false;
 	}
-	
-	onSelectionChange(boxes, options);
+
+	onSelectionChange(boxes);
 }
 
 function getNumChecked(boxes) {
-	return (Array.prototype.map.call(boxes, function(c) {
-		return c.checked ? 1 : 0;
-	})).reduce(function (p, c) {
-			return p + c;
+	return (Array.prototype.map.call(boxes, function (c) {
+			return c.checked ? 1 : 0;
+		})).reduce(function (p, c) {
+		return p + c;
 	});
 }
 
-function registerSelectionChangeHandlers(options) {
-	var boxes = options.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
+function registerSelectionChangeHandlers() {
+	var boxes = config.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
 	boxes.listener = function () {
-		if (getNumChecked(boxes) < options.range) {
-			options.table.querySelector('thead input[type="checkbox"]').checked = false;
+		if (getNumChecked(boxes) < config.range) {
+			config.table.querySelector('thead input[type="checkbox"]').checked = false;
 		} else {
-			options.table.querySelector('thead input[type="checkbox"]').checked = true;
+			config.table.querySelector('thead input[type="checkbox"]').checked = true;
 		}
-		onSelectionChange(boxes, options);
+		onSelectionChange(boxes);
 	};
 	Array.prototype.map.call(boxes, function (o) {
 		if (!o.listener || o.listener !== boxes.listener) {
 			o.addEventListener('change', boxes.listener);
 			o.listener = boxes.listener;
 		}
-	})
-	
+	});
 
-	options.table.querySelector('thead tr td:first-child > input[type="checkbox"]').addEventListener('change', function (e) {
+	config.table.querySelector('thead tr td:first-child > input[type="checkbox"]').addEventListener('change', function (e) {
 		if (!e.target.checked) {
 			for (var i = 0, l = boxes.length; i < l; i += 1) {
 				(function () {
@@ -254,33 +257,35 @@ function registerSelectionChangeHandlers(options) {
 			l = boxes.length;
 			for (; i < l; i += 1) {
 				(function () {
-					if (!this.disabled && i < options.range) {
+					if (!this.disabled && i < config.range) {
 						this.checked = true;
 						c += 1;
 					}
 				}).call(boxes[i]);
 			}
 		}
-		onSelectionChange(boxes, options);
+		onSelectionChange(boxes);
 	});
 }
 
-function sortTable(options) {
-	options.data.sort(sortByMultiple.apply(null, options.sortPattern));
-	renderTableHeader(options);
-	renderTableBody(options);
-	options.table.dispatchEvent(getEvent('sort', {detail:'sorted'}));
-	registerSelectionChangeHandlers(options);
-	registerMouseClickHandlers(options);
-	updateSelectionLength(options);
+function sortTable() {
+	config.data.sort(sortByMultiple.apply(null, config.sortPattern));
+	renderTableHeader();
+	renderTableBody();
+	config.table.dispatchEvent(getEvent('sort', {
+			detail : 'sorted'
+		}));
+	registerSelectionChangeHandlers();
+	registerMouseClickHandlers();
+	updateSelectionLength();
 }
 
-function registerMouseClickHandlers(options) {
-	var vsort = options.table.querySelectorAll('.xsort-v > b'),
-	hsort = options.table.querySelectorAll('.xsort-h > b'),
-	off = options.table.querySelectorAll('.xsort-off > b'),
-	on = options.table.querySelectorAll('.xsort-on > b');
-	
+function registerMouseClickHandlers() {
+	var vsort = config.table.querySelectorAll('.xsort-v > b'),
+	hsort = config.table.querySelectorAll('.xsort-h > b'),
+	off = config.table.querySelectorAll('.xsort-off > b'),
+	on = config.table.querySelectorAll('.xsort-on > b');
+
 	vsort.listener = function (e) {
 		e.stopPropagation();
 		var col = e.target.parentNode.parentNode,
@@ -291,13 +296,13 @@ function registerMouseClickHandlers(options) {
 		} else {
 			ord = '>';
 		}
-		options.sortPattern = options.sortPattern.map(function (o, i) {
+		config.sortPattern = config.sortPattern.map(function (o, i) {
 				if (o[0] === name) {
 					o[1] = ord;
 				}
 				return o;
 			});
-		sortTable(options);
+		sortTable();
 	};
 	Array.prototype.map.call(vsort, function (o) {
 		if (!o.listener || o.listener !== vsort.listener) {
@@ -310,17 +315,17 @@ function registerMouseClickHandlers(options) {
 		var col = e.target.parentNode.parentNode,
 		priority = parseInt(col.getAttribute('data-priority')),
 		a;
-		if (priority > -1) {				
+		if (priority > -1) {
 			if (e.target.parentNode.classList.contains('inc') && priority > 0) {
-				a = options.sortPattern[priority - 1];
-				options.sortPattern[priority - 1] = options.sortPattern[priority];
-				options.sortPattern[priority] = a;
-				sortTable(options);
-			} else if (e.target.parentNode.classList.contains('dec') && priority < options.sortPattern.length - 1) {
-				a = options.sortPattern[priority];
-				options.sortPattern[priority] = options.sortPattern[priority + 1];
-				options.sortPattern[priority + 1] = a;
-				sortTable(options);
+				a = config.sortPattern[priority - 1];
+				config.sortPattern[priority - 1] = config.sortPattern[priority];
+				config.sortPattern[priority] = a;
+				sortTable();
+			} else if (e.target.parentNode.classList.contains('dec') && priority < config.sortPattern.length - 1) {
+				a = config.sortPattern[priority];
+				config.sortPattern[priority] = config.sortPattern[priority + 1];
+				config.sortPattern[priority + 1] = a;
+				sortTable();
 			}
 		}
 	};
@@ -334,12 +339,12 @@ function registerMouseClickHandlers(options) {
 		e.stopPropagation();
 		var col = e.target.parentNode.parentNode;
 		p = parseInt(col.getAttribute('data-priority'));
-		if (p > -1) {				
-			options.sortPattern.splice(p, 1);
-			sortTable(options);
+		if (p > -1) {
+			config.sortPattern.splice(p, 1);
+			sortTable();
 		}
 	};
-	Array.prototype.map.call(off, function (o){
+	Array.prototype.map.call(off, function (o) {
 		if (!o.listener || o.listener !== off.listener) {
 			o.addEventListener('click', off.listener);
 		}
@@ -347,17 +352,16 @@ function registerMouseClickHandlers(options) {
 	});
 	on.listener = function (e) {
 		e.stopPropagation();
-		var col = e.target.parentNode.parentNode, c = [];
-			c = (function (a) {
-			for(var i = 0, l = a.length; i < l; i += 1) {
-				c.push(a[i][0]);
-			}
-			return c;
-		})(options.sortPattern);
+		var col = e.target.parentNode.parentNode,
+		a = config.sortPattern,
+		c = [];
+		for (var i = 0, l = a.length; i < l; i += 1) {
+			c.push(a[i][0]);
+		}
 		p = c.indexOf(col.getAttribute('data-col'));
 		if (p < 0) {
-			options.sortPattern.push([col.getAttribute('data-col'), '<']);
-			sortTable(options);
+			config.sortPattern.push([col.getAttribute('data-col'), '<']);
+			sortTable();
 		}
 	};
 	Array.prototype.map.call(on, function (o) {
@@ -368,90 +372,88 @@ function registerMouseClickHandlers(options) {
 	});
 }
 
-function registerSelectionRangeHandlers(options) {
-	var rangeInput = options.table.querySelector('caption .select-range-controls > input');
+function registerSelectionRangeHandlers() {
+	var rangeInput = config.table.querySelector('caption .select-range-controls > input');
 
-	rangeInput.value = options.range;
+	rangeInput.value = config.range;
 
 	rangeInput.addEventListener('change', function (e) {
-		options.range = parseInt(e.target.value, 10);
-		updateSelectionLength(options);
+		config.range = parseInt(e.target.value, 10);
+		updateSelectionLength();
 	});
 
-	options.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
-		options.range += 1;
-		if (options.range > options.data.length) {
-			return options.range = options.data.length;
+	config.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
+		config.range += 1;
+		if (config.range > config.data.length) {
+			return config.range = config.data.length;
 		}
-		rangeInput.value = options.range;
-		updateSelectionLength(options);
+		rangeInput.value = config.range;
+		updateSelectionLength();
 	});
 
-	options.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
-		options.range -= 1;
-		if (options.range < 0) {
-			return options.range = 0;
+	config.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
+		config.range -= 1;
+		if (config.range < 0) {
+			return config.range = 0;
 		}
-		rangeInput.value = options.range;
-		updateSelectionLength(options);
+		rangeInput.value = config.range;
+		updateSelectionLength();
 	});
 }
 
-function renderTableHeader(options) {
-	var th = options.table.querySelector('thead'),
-	cols = options.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
+function renderTableHeader() {
+	var th = config.table.querySelector('thead'),
+	cols = config.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
 	letters = getLetters(),
 	html = '',
 	crow = '<tr class="priority ctrl"><td></td>',
+	a = config.sortPattern,
 	c = [],
-	i = 0, 
-	l = options.sortPattern.length, 
-	n = 0, 
-	z = cols.length;	
-	
+	i = 0,
+	l = config.sortPattern.length,
+	n = 0,
+	z = cols.length;
+
 	Array.prototype.map.call(th.querySelectorAll('.priority'), function (o) {
 		return th.removeChild(o);
 	});
-	
-	options.colors = getColors(l, options);
-	
-	c = (function (a) {
-		for(var i = 0, l = a.length; i < l; i += 1) {
-			c.push(a[i][0]);
-		}
-		return c;
-	})(options.sortPattern);
-	
-	for (; n < z; n += 1) {		
+
+	config.colors = getColors(l);
+
+	for (var i = 0, l = a.length; i < l; i += 1) {
+		c.push(a[i][0]);
+	}
+
+	for (; n < z; n += 1) {
 		crow += [
-			'<td data-col="', 
-			cols[n].getAttribute('data-col'), 
+			'<td data-col="',
+			cols[n].getAttribute('data-col'),
 			'"data-priority=',
 			c.indexOf(cols[n].getAttribute('data-col')),
-			'>', 
+			'>',
 			'<div class="xsort-h dec"><b></b></div>',
-			'<div class="xsort-on"><b></b></div>', 
+			'<div class="xsort-on"><b></b></div>',
 			'<div class="xsort-off"><b></b></div>',
 			'<div class="xsort-h inc"><b></b></div>',
 			'</td>'
 		].join('');
 	}
-	
+
 	for (i = 0; i < l; i += 1) {
 		html += '<tr class="priority">';
-		html += ['<td style="background-color:rgb(', options.colors[i], ')">', letters[i], '</td>'].join('');
-		
+		html += ['<td style="background-color:rgb(', config.colors[i], ')">', letters[i], '</td>'].join('');
+
 		for (n = 0; n < z; n += 1) {
-			if (cols[n].getAttribute('data-col') === options.sortPattern[i][0]) {										
+			if (cols[n].getAttribute('data-col') === config.sortPattern[i][0]) {
 				html += [
-					'<td data-col="', 
-					options.sortPattern[i][0], 
+					'<td data-col="',
+					config.sortPattern[i][0],
 					'"><div class="xsort-v',
-					(options.sortPattern[i][1] !== '<' ? ' asc' : ''),
+					(config.sortPattern[i][1] !== '<' ? ' asc' : ''),
 					'"><b style="border-',
-					(options.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
+					(config.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
 					'-color: rgb(',
-					options.colors[i],
+					config.colors[i],
 					');"></b></div></td>'
 				].join('');
 			} else {
@@ -461,59 +463,62 @@ function renderTableHeader(options) {
 		html += '</tr>';
 	}
 	th.innerHTML = html + crow + th.innerHTML;
-	
+
 }
 
-function renderTableBody(options) {
+function renderTableBody() {
 	var html = '',
 	i = 0,
-	l = options.data.length;
-	options.table.querySelector('tbody').innerHTML = '';
+	l = config.data.length;
+	config.table.querySelector('tbody').innerHTML = '';
 	for (; i < l; i += 1) {
-		html += template(options.table.querySelector('caption > textarea').value,
+		html += template(config.table.querySelector('caption > textarea').value,
 			augment({
-				checked : i < options.range ? 'checked' : ''
-			}, options.data[i]));
+				checked : i < config.range ? 'checked' : ''
+			}, config.data[i]));
 	}
-	options.table.querySelector('tbody').innerHTML = html;
+	config.table.querySelector('tbody').innerHTML = html;
 }
 
+var config, defaults = {
+	table : 'table.xsort',
+	data : [],
+	range : -1,
+	sortPattern : [],
+	selected : 0,
+	hueOffset : 30,
+	maxHueShift : 120,
+	saturation : 90,
+	brightness : 100
+};
+
 function renderTable(options) {
+	config = augment(augment({}, defaults), options);
 
-	options = augment({
-			table : 'table.xsort',
-			data : [],
-			range : -1,
-			sortPattern : [],
-			selected : 0,
-			hueOffset : 30,
-			maxHueShift : 120,
-			saturation : 90,
-			brightness : 100
-		}, options);
-
-	if (options.range < 0 || options.range > options.data.length) {
-		options.range = options.data.length;
+	if (config.range < 0 || config.range > config.data.length) {
+		config.range = config.data.length;
 	}
-	options.selector = options.table;
-	options.table = document.querySelector(options.table);
+	config.selector = config.table;
+	config.table = document.querySelector(config.table);
 
-	renderTableHeader(options);
+	renderTableHeader();
 
-	options.data.sort(sortByMultiple.apply(null, options.sortPattern));
-	
-	options.table.querySelector('caption .counters .total').textContent = options.data.length;
-	options.table.querySelector('caption .counters .selected').textContent = options.range;
-	options.table.addEventListener('selection', function (e) {
-		options.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
-		options.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
+	config.data.sort(sortByMultiple.apply(null, config.sortPattern));
+
+	config.table.querySelector('caption .counters .total').textContent = config.data.length;
+	config.table.querySelector('caption .counters .selected').textContent = config.range;
+	config.table.addEventListener('selection', function (e) {
+		config.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
+		config.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
 	});
 
-	renderTableBody(options);
+	renderTableBody();
 
-	registerSelectionRangeHandlers(options);
-	registerMouseClickHandlers(options);
-	registerSelectionChangeHandlers(options);
-	
-	options.table.dispatchEvent(getEvent('render', {detail:'rendered'}));
+	registerSelectionRangeHandlers();
+	registerMouseClickHandlers();
+	registerSelectionChangeHandlers();
+
+	config.table.dispatchEvent(getEvent('render', {
+			detail : 'rendered'
+		}));
 }
