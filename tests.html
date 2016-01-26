@@ -120,19 +120,15 @@
 			t.dispatchEvent(e);
 		});
 		
-		QUnit.test('test table events: render, sort, selection', function (assert) {
+		QUnit.test('test table events: sort, selection', function (assert) {
 			var data = formatData(getDataMatrix(8, 2)), 
 			table = document.getElementById('my-table');
-			expect(5);
+			expect(4);
 			var d = [];
-			for (var i = 0; i < 5; i += 1) {
+			for (var i = 0; i < 4; i += 1) {
 				d.push(assert.async());
 			}
 			
-			table.addEventListener('render', function (e) {
-				assert.ok(e.detail, 'render');
-				(d.shift())();
-			});
 			table.addEventListener('sort', function (e) {
 				assert.ok(e.detail, 'sort');
 				(d.shift())();

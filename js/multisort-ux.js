@@ -126,19 +126,18 @@ function hsvToRgb(h, s, v) {
 	return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-function getColors(length) {
-	var colors = [],
-	start = config.hueOffset,
-	step = Math.round(config.maxHueShift / length),
-	i = 0,
-	z,
-	max,
-	sum;
+function template(html, data) {
+	return html.replace(/{{([^{}]*)}}/g, function (match, p1, p2, p3, offset, string) {
+		return data[p1] === null ? '' : data[p1];
+	});
+}
 
-	for (; i < length; i += 1) {
-		colors.push(hsvToRgb(start + (i * step), config.saturation, config.brightness).join(','));
-	}
-	return colors;
+function getNumChecked(boxes) {
+	return (Array.prototype.map.call(boxes, function (c) {
+			return c.checked ? 1 : 0;
+		})).reduce(function (p, c) {
+		return p + c;
+	});
 }
 
 function sortByMultiple() {
@@ -164,335 +163,351 @@ function sortByMultiple() {
 	};
 }
 
-function template(html, data) {
-	return html.replace(/{{([^{}]*)}}/g, function (match, p1, p2, p3, offset, string) {
-		return data[p1] === null ? '' : data[p1];
-	});
-}
+function renderTable(options) {
 
-function onSelectionChange(boxes) {
-	config.selected = [];
-	for (var i = 0, l = boxes.length; i < l; i += 1) {
-		(function () {
-			if (this.checked) {
-				config.selected.push(this.value);
-			}
-		}).call(boxes[i]);
+	// func start
+
+	function getColors(length) {
+		var colors = [],
+		start = config.hueOffset,
+		step = Math.round(config.maxHueShift / length),
+		i = 0,
+		z,
+		max,
+		sum;
+
+		for (; i < length; i += 1) {
+			colors.push(hsvToRgb(start + (i * step), config.saturation, config.brightness).join(','));
+		}
+		return colors;
 	}
 
-	var state = augment({}, config);
-	state.table = config.selector;
-	config.table.dispatchEvent(getEvent('selection', {
-			detail : {
-				data : state.data,
-				selected : state.selected,
-				state : state
-			}
-		}));
-}
+	function onSelectionChange(boxes) {
+		config.selected = [];
+		for (var i = 0, l = boxes.length; i < l; i += 1) {
+			(function () {
+				if (this.checked) {
+					config.selected.push(this.value);
+				}
+			}).call(boxes[i]);
+		}
 
-function updateSelectionLength() {
-	var i,
-	l,
-	allBox = config.table.querySelector('thead input[type="checkbox"]'),
-	boxes = config.table.querySelectorAll('tbody input[type="checkbox"]'),
-	checkedCount = getNumChecked(boxes);
-	if (checkedCount > config.range) {
-		for (i = boxes.length - 1; i > -1; i -= 1) {
-			if (boxes[i].checked) {
-				boxes[i].checked = false;
-				if (getNumChecked(boxes) === config.range) {
-					break;
+		var state = augment({}, config);
+		state.table = config.selector;
+		config.table.dispatchEvent(getEvent('selection', {
+				detail : {
+					data : state.data,
+					selected : state.selected,
+					state : state
+				}
+			}));
+	}
+
+	function updateSelectionLength() {
+		var i,
+		l,
+		allBox = config.table.querySelector('thead input[type="checkbox"]'),
+		boxes = config.table.querySelectorAll('tbody input[type="checkbox"]'),
+		checkedCount = getNumChecked(boxes);
+		if (checkedCount > config.range) {
+			for (i = boxes.length - 1; i > -1; i -= 1) {
+				if (boxes[i].checked) {
+					boxes[i].checked = false;
+					if (getNumChecked(boxes) === config.range) {
+						break;
+					}
 				}
 			}
 		}
-	}
-	if (getNumChecked(boxes) >= config.range) {
-		allBox.checked = true;
-	} else {
-		allBox.checked = false;
-	}
-
-	onSelectionChange(boxes);
-}
-
-function getNumChecked(boxes) {
-	return (Array.prototype.map.call(boxes, function (c) {
-			return c.checked ? 1 : 0;
-		})).reduce(function (p, c) {
-		return p + c;
-	});
-}
-
-function registerSelectionChangeHandlers() {
-	var boxes = config.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
-
-	boxes.listener = function () {
-		if (getNumChecked(boxes) < config.range) {
-			config.table.querySelector('thead input[type="checkbox"]').checked = false;
+		if (getNumChecked(boxes) >= config.range) {
+			allBox.checked = true;
 		} else {
-			config.table.querySelector('thead input[type="checkbox"]').checked = true;
+			allBox.checked = false;
 		}
+
 		onSelectionChange(boxes);
-	};
-	Array.prototype.map.call(boxes, function (o) {
-		if (!o.listener || o.listener !== boxes.listener) {
-			o.addEventListener('change', boxes.listener);
-			o.listener = boxes.listener;
-		}
-	});
+	}
+	
+	function registerSelectionRangeHandlers() {
+		var rangeInput = config.table.querySelector('caption .select-range-controls > input');
 
-	config.table.querySelector('thead tr td:first-child > input[type="checkbox"]').addEventListener('change', function (e) {
-		if (!e.target.checked) {
-			for (var i = 0, l = boxes.length; i < l; i += 1) {
-				(function () {
-					if (!this.disabled) {
-						this.checked = false;
-					}
-				}).call(boxes[i]);
+		rangeInput.value = config.range;
+
+		rangeInput.addEventListener('change', function (e) {
+			config.range = parseInt(e.target.value, 10);
+			updateSelectionLength();
+		});
+
+		config.table.querySelector('caption .counters .total').textContent = config.data.length;
+		config.table.querySelector('caption .counters .selected').textContent = config.range;
+		config.table.addEventListener('selection', function (e) {
+			config.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
+			config.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
+		});
+
+		config.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
+			config.range += 1;
+			if (config.range > config.data.length) {
+				return config.range = config.data.length;
 			}
-		} else {
-			var c = 0,
-			i = 0,
-			l = boxes.length;
-			for (; i < l; i += 1) {
-				(function () {
-					if (!this.disabled && i < config.range) {
-						this.checked = true;
-						c += 1;
-					}
-				}).call(boxes[i]);
+			rangeInput.value = config.range;
+			updateSelectionLength();
+		});
+
+		config.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
+			config.range -= 1;
+			if (config.range < 0) {
+				return config.range = 0;
 			}
-		}
-		onSelectionChange(boxes);
-	});
-}
+			rangeInput.value = config.range;
+			updateSelectionLength();
+		});
+	}
 
-function sortTable() {
-	config.data.sort(sortByMultiple.apply(null, config.sortPattern));
-	renderTableHeader();
-	renderTableBody();
-	config.table.dispatchEvent(getEvent('sort', {
-			detail : 'sorted'
-		}));
-	registerSelectionChangeHandlers();
-	registerMouseClickHandlers();
-	updateSelectionLength();
-}
+	function registerSelectionChangeHandlers() {
+		var boxes = config.table.querySelectorAll('tbody tr td:first-child > input[type="checkbox"]');
 
-function registerMouseClickHandlers() {
-	var vsort = config.table.querySelectorAll('.xsort-v > b'),
-	hsort = config.table.querySelectorAll('.xsort-h > b'),
-	off = config.table.querySelectorAll('.xsort-off > b'),
-	on = config.table.querySelectorAll('.xsort-on > b');
+		boxes.listener = function () {
+			if (getNumChecked(boxes) < config.range) {
+				config.table.querySelector('thead input[type="checkbox"]').checked = false;
+			} else {
+				config.table.querySelector('thead input[type="checkbox"]').checked = true;
+			}
+			onSelectionChange(boxes);
+		};
+		Array.prototype.map.call(boxes, function (o) {
+			if (!o.listener || o.listener !== boxes.listener) {
+				o.addEventListener('change', boxes.listener);
+				o.listener = boxes.listener;
+			}
+		});
 
-	vsort.listener = function (e) {
-		e.stopPropagation();
-		var col = e.target.parentNode.parentNode,
-		ord,
-		name = col.getAttribute('data-col');
-		if (e.target.parentNode.classList.contains('asc')) {
-			ord = '<';
-		} else {
-			ord = '>';
-		}
-		config.sortPattern = config.sortPattern.map(function (o, i) {
-				if (o[0] === name) {
-					o[1] = ord;
+		config.table.querySelector('thead tr td:first-child > input[type="checkbox"]').addEventListener('change', function (e) {
+			if (!e.target.checked) {
+				for (var i = 0, l = boxes.length; i < l; i += 1) {
+					(function () {
+						if (!this.disabled) {
+							this.checked = false;
+						}
+					}).call(boxes[i]);
 				}
-				return o;
-			});
-		sortTable();
-	};
-	Array.prototype.map.call(vsort, function (o) {
-		if (!o.listener || o.listener !== vsort.listener) {
-			o.addEventListener('click', vsort.listener);
-		}
-		o.listener = vsort.listener;
-	});
-	hsort.listener = function (e) {
-		e.stopPropagation();
-		var col = e.target.parentNode.parentNode,
-		priority = parseInt(col.getAttribute('data-priority')),
-		a;
-		if (priority > -1) {
-			if (e.target.parentNode.classList.contains('inc') && priority > 0) {
-				a = config.sortPattern[priority - 1];
-				config.sortPattern[priority - 1] = config.sortPattern[priority];
-				config.sortPattern[priority] = a;
-				sortTable();
-			} else if (e.target.parentNode.classList.contains('dec') && priority < config.sortPattern.length - 1) {
-				a = config.sortPattern[priority];
-				config.sortPattern[priority] = config.sortPattern[priority + 1];
-				config.sortPattern[priority + 1] = a;
-				sortTable();
+			} else {
+				var c = 0,
+				i = 0,
+				l = boxes.length;
+				for (; i < l; i += 1) {
+					(function () {
+						if (!this.disabled && i < config.range) {
+							this.checked = true;
+							c += 1;
+						}
+					}).call(boxes[i]);
+				}
 			}
-		}
-	};
-	Array.prototype.map.call(hsort, function (o) {
-		if (!o.listener || o.listener !== hsort.listener) {
-			o.addEventListener('click', hsort.listener);
-		}
-		o.listener = hsort.listener;
-	});
-	off.listener = function (e) {
-		e.stopPropagation();
-		var col = e.target.parentNode.parentNode;
-		p = parseInt(col.getAttribute('data-priority'));
-		if (p > -1) {
-			config.sortPattern.splice(p, 1);
+			onSelectionChange(boxes);
+		});
+	}
+
+	function registerMouseClickHandlers() {
+		var vsort = config.table.querySelectorAll('.xsort-v > b'),
+		hsort = config.table.querySelectorAll('.xsort-h > b'),
+		off = config.table.querySelectorAll('.xsort-off > b'),
+		on = config.table.querySelectorAll('.xsort-on > b');
+
+		vsort.listener = function (e) {
+			e.stopPropagation();
+			var col = e.target.parentNode.parentNode,
+			ord,
+			name = col.getAttribute('data-col');
+			if (e.target.parentNode.classList.contains('asc')) {
+				ord = '<';
+			} else {
+				ord = '>';
+			}
+			config.sortPattern = config.sortPattern.map(function (o, i) {
+					if (o[0] === name) {
+						o[1] = ord;
+					}
+					return o;
+				});
 			sortTable();
-		}
-	};
-	Array.prototype.map.call(off, function (o) {
-		if (!o.listener || o.listener !== off.listener) {
-			o.addEventListener('click', off.listener);
-		}
-		o.listener = off.listener;
-	});
-	on.listener = function (e) {
-		e.stopPropagation();
-		var col = e.target.parentNode.parentNode,
+		};
+		Array.prototype.map.call(vsort, function (o) {
+			if (!o.listener || o.listener !== vsort.listener) {
+				o.addEventListener('click', vsort.listener);
+			}
+			o.listener = vsort.listener;
+		});
+		hsort.listener = function (e) {
+			e.stopPropagation();
+			var col = e.target.parentNode.parentNode,
+			priority = parseInt(col.getAttribute('data-priority')),
+			a;
+			if (priority > -1) {
+				if (e.target.parentNode.classList.contains('inc') && priority > 0) {
+					a = config.sortPattern[priority - 1];
+					config.sortPattern[priority - 1] = config.sortPattern[priority];
+					config.sortPattern[priority] = a;
+					sortTable();
+				} else if (e.target.parentNode.classList.contains('dec') && priority < config.sortPattern.length - 1) {
+					a = config.sortPattern[priority];
+					config.sortPattern[priority] = config.sortPattern[priority + 1];
+					config.sortPattern[priority + 1] = a;
+					sortTable();
+				}
+			}
+		};
+		Array.prototype.map.call(hsort, function (o) {
+			if (!o.listener || o.listener !== hsort.listener) {
+				o.addEventListener('click', hsort.listener);
+			}
+			o.listener = hsort.listener;
+		});
+		off.listener = function (e) {
+			e.stopPropagation();
+			var col = e.target.parentNode.parentNode;
+			p = parseInt(col.getAttribute('data-priority'));
+			if (p > -1) {
+				config.sortPattern.splice(p, 1);
+				sortTable();
+			}
+		};
+		Array.prototype.map.call(off, function (o) {
+			if (!o.listener || o.listener !== off.listener) {
+				o.addEventListener('click', off.listener);
+			}
+			o.listener = off.listener;
+		});
+		on.listener = function (e) {
+			e.stopPropagation();
+			var col = e.target.parentNode.parentNode,
+			a = config.sortPattern,
+			c = [];
+			for (var i = 0, l = a.length; i < l; i += 1) {
+				c.push(a[i][0]);
+			}
+			p = c.indexOf(col.getAttribute('data-col'));
+			if (p < 0) {
+				config.sortPattern.push([col.getAttribute('data-col'), '<']);
+				sortTable();
+			}
+		};
+		Array.prototype.map.call(on, function (o) {
+			if (!o.listener || o.listener !== on.listener) {
+				o.addEventListener('click', on.listener);
+			}
+			o.listener = on.listener;
+		});
+	}
+
+	function renderTableHeader() {
+		var th = config.table.querySelector('thead'),
+		cols = config.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
+		letters = getLetters(),
+		html = '',
+		crow = '<tr class="priority ctrl"><td></td>',
 		a = config.sortPattern,
-		c = [];
+		c = [],
+		i = 0,
+		l = config.sortPattern.length,
+		n = 0,
+		z = cols.length;
+
+		Array.prototype.map.call(th.querySelectorAll('.priority'), function (o) {
+			return th.removeChild(o);
+		});
+
+		config.colors = getColors(l);
+
 		for (var i = 0, l = a.length; i < l; i += 1) {
 			c.push(a[i][0]);
 		}
-		p = c.indexOf(col.getAttribute('data-col'));
-		if (p < 0) {
-			config.sortPattern.push([col.getAttribute('data-col'), '<']);
-			sortTable();
+
+		for (; n < z; n += 1) {
+			crow += [
+				'<td data-col="',
+				cols[n].getAttribute('data-col'),
+				'"data-priority=',
+				c.indexOf(cols[n].getAttribute('data-col')),
+				'>',
+				'<div class="xsort-h dec"><b></b></div>',
+				'<div class="xsort-on"><b></b></div>',
+				'<div class="xsort-off"><b></b></div>',
+				'<div class="xsort-h inc"><b></b></div>',
+				'</td>'
+			].join('');
 		}
-	};
-	Array.prototype.map.call(on, function (o) {
-		if (!o.listener || o.listener !== on.listener) {
-			o.addEventListener('click', on.listener);
-		}
-		o.listener = on.listener;
-	});
-}
 
-function registerSelectionRangeHandlers() {
-	var rangeInput = config.table.querySelector('caption .select-range-controls > input');
+		for (i = 0; i < l; i += 1) {
+			html += '<tr class="priority">';
+			html += ['<td style="background-color:rgb(', config.colors[i], ')">', letters[i], '</td>'].join('');
 
-	rangeInput.value = config.range;
-
-	rangeInput.addEventListener('change', function (e) {
-		config.range = parseInt(e.target.value, 10);
-		updateSelectionLength();
-	});
-
-	config.table.querySelector('caption .select-range-controls > .increment').addEventListener('click', function () {
-		config.range += 1;
-		if (config.range > config.data.length) {
-			return config.range = config.data.length;
-		}
-		rangeInput.value = config.range;
-		updateSelectionLength();
-	});
-
-	config.table.querySelector('caption .select-range-controls > .decrement').addEventListener('click', function () {
-		config.range -= 1;
-		if (config.range < 0) {
-			return config.range = 0;
-		}
-		rangeInput.value = config.range;
-		updateSelectionLength();
-	});
-}
-
-function renderTableHeader() {
-	var th = config.table.querySelector('thead'),
-	cols = config.table.querySelectorAll('thead tr:last-child td:not(:first-child)'),
-	letters = getLetters(),
-	html = '',
-	crow = '<tr class="priority ctrl"><td></td>',
-	a = config.sortPattern,
-	c = [],
-	i = 0,
-	l = config.sortPattern.length,
-	n = 0,
-	z = cols.length;
-
-	Array.prototype.map.call(th.querySelectorAll('.priority'), function (o) {
-		return th.removeChild(o);
-	});
-
-	config.colors = getColors(l);
-
-	for (var i = 0, l = a.length; i < l; i += 1) {
-		c.push(a[i][0]);
-	}
-
-	for (; n < z; n += 1) {
-		crow += [
-			'<td data-col="',
-			cols[n].getAttribute('data-col'),
-			'"data-priority=',
-			c.indexOf(cols[n].getAttribute('data-col')),
-			'>',
-			'<div class="xsort-h dec"><b></b></div>',
-			'<div class="xsort-on"><b></b></div>',
-			'<div class="xsort-off"><b></b></div>',
-			'<div class="xsort-h inc"><b></b></div>',
-			'</td>'
-		].join('');
-	}
-
-	for (i = 0; i < l; i += 1) {
-		html += '<tr class="priority">';
-		html += ['<td style="background-color:rgb(', config.colors[i], ')">', letters[i], '</td>'].join('');
-
-		for (n = 0; n < z; n += 1) {
-			if (cols[n].getAttribute('data-col') === config.sortPattern[i][0]) {
-				html += [
-					'<td data-col="',
-					config.sortPattern[i][0],
-					'"><div class="xsort-v',
-					(config.sortPattern[i][1] !== '<' ? ' asc' : ''),
-					'"><b style="border-',
-					(config.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
-					'-color: rgb(',
-					config.colors[i],
-					');"></b></div></td>'
-				].join('');
-			} else {
-				html += '<td></td>';
+			for (n = 0; n < z; n += 1) {
+				if (cols[n].getAttribute('data-col') === config.sortPattern[i][0]) {
+					html += [
+						'<td data-col="',
+						config.sortPattern[i][0],
+						'"><div class="xsort-v',
+						(config.sortPattern[i][1] !== '<' ? ' asc' : ''),
+						'"><b style="border-',
+						(config.sortPattern[i][1] !== '<' ? 'bottom' : 'top'),
+						'-color: rgb(',
+						config.colors[i],
+						');"></b></div></td>'
+					].join('');
+				} else {
+					html += '<td></td>';
+				}
 			}
+			html += '</tr>';
 		}
-		html += '</tr>';
+		th.innerHTML = html + crow + th.innerHTML;
+
 	}
-	th.innerHTML = html + crow + th.innerHTML;
 
-}
-
-function renderTableBody() {
-	var html = '',
-	i = 0,
-	l = config.data.length;
-	config.table.querySelector('tbody').innerHTML = '';
-	for (; i < l; i += 1) {
-		html += template(config.table.querySelector('caption > textarea').value,
-			augment({
-				checked : i < config.range ? 'checked' : ''
-			}, config.data[i]));
+	function renderTableBody() {
+		var html = '',
+		i = 0,
+		l = config.data.length;
+		config.table.querySelector('tbody').innerHTML = '';
+		for (; i < l; i += 1) {
+			html += template(config.table.querySelector('caption > textarea').value,
+				augment({
+					checked : i < config.range ? 'checked' : ''
+				}, config.data[i]));
+		}
+		config.table.querySelector('tbody').innerHTML = html;
 	}
-	config.table.querySelector('tbody').innerHTML = html;
-}
 
-var config, defaults = {
-	table : 'table.xsort',
-	data : [],
-	range : -1,
-	sortPattern : [],
-	selected : 0,
-	hueOffset : 30,
-	maxHueShift : 120,
-	saturation : 90,
-	brightness : 100
-};
+	function render() {
+		config.data.sort(sortByMultiple.apply(null, config.sortPattern));
+		renderTableHeader();
+		renderTableBody();
+		registerSelectionChangeHandlers();
+		registerMouseClickHandlers();
+	}
 
-function renderTable(options) {
+	function sortTable() {
+		render();
+		config.table.dispatchEvent(getEvent('sort', {
+				detail : 'sorted'
+			}));
+		updateSelectionLength();
+	}
+
+	var config,
+	defaults = {
+		table : 'table.xsort',
+		data : [],
+		range : -1,
+		sortPattern : [],
+		selected : 0,
+		hueOffset : 30,
+		maxHueShift : 120,
+		saturation : 90,
+		brightness : 100
+	};
+
 	config = augment(augment({}, defaults), options);
 
 	if (config.range < 0 || config.range > config.data.length) {
@@ -501,24 +516,8 @@ function renderTable(options) {
 	config.selector = config.table;
 	config.table = document.querySelector(config.table);
 
-
-	config.data.sort(sortByMultiple.apply(null, config.sortPattern));
-
-	config.table.querySelector('caption .counters .total').textContent = config.data.length;
-	config.table.querySelector('caption .counters .selected').textContent = config.range;
-	config.table.addEventListener('selection', function (e) {
-		config.table.querySelector('caption .counters .total').textContent = e.detail.data.length;
-		config.table.querySelector('caption .counters .selected').textContent = e.detail.selected.length;
-	});
-
-	renderTableHeader();
-	renderTableBody();
-
 	registerSelectionRangeHandlers();
-	registerMouseClickHandlers();
-	registerSelectionChangeHandlers();
+	render();
 
-	config.table.dispatchEvent(getEvent('render', {
-			detail : 'rendered'
-		}));
+	// func end
 }
