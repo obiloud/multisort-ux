@@ -501,7 +501,7 @@ function renderTable(options) {
 		data : [],
 		range : -1,
 		sortPattern : [],
-		selected : 0,
+		selected : [],
 		hueOffset : 30,
 		maxHueShift : 120,
 		saturation : 90,
@@ -517,7 +517,6 @@ function renderTable(options) {
 	config.table = document.querySelector(config.table);
 
 	registerSelectionRangeHandlers();
-	render();
-
+	sortTable();
 	// func end
 }
